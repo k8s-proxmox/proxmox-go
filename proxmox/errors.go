@@ -1,8 +1,14 @@
 package proxmox
 
+import "net/http"
+
 const (
 	NotFound      = "resource not found"
 	NotAuthorized = "not authorized"
+)
+
+var (
+	NotFoundErr = &Error{code: http.StatusNotFound, returnMessage: NotFound}
 )
 
 type Error struct {

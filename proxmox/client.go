@@ -125,15 +125,10 @@ func (c *RESTClient) Do(httpMethod, urlPath string, req, v interface{}) error {
 		return err
 	}
 	if body, ok := datakey["data"]; ok {
-		if err := json.Unmarshal(body, &v); err != nil {
-			return err
-		}
+		return json.Unmarshal(body, &v)
 	}
 
-	if err := json.Unmarshal(buf, &v); err != nil {
-		return err
-	}
-	return nil
+	return json.Unmarshal(buf, &v)
 }
 
 func (c *RESTClient) Get(path string, res interface{}) error {
