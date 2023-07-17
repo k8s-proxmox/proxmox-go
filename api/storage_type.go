@@ -1,4 +1,4 @@
-package proxmox
+package api
 
 type Storage struct {
 	Active       int
@@ -13,27 +13,6 @@ type Storage struct {
 	UsedFraction float64 `json:"used_fraction"`
 }
 
-func (c *RESTClient) GetStorages() ([]*Storage, error) {
-	var storages []*Storage
-	if err := c.Get("/storage", &storages); err != nil {
-		return nil, err
-	}
-	return storages, nil
-}
-
-func (c *RESTClient) GetStorage(name string) (*Storage, error) {
-	storages, err := c.GetStorages()
-	if err != nil {
-		return nil, err
-	}
-	for _, s := range storages {
-		if s.Storage == name {
-			return s, nil
-		}
-	}
-	return nil, NotFoundErr
-}
-
 // wip
 // https://pve.proxmox.com/pve-docs/api-viewer/#/storage
 type StorageCreateOptions struct {
@@ -46,14 +25,4 @@ type StorageCreateOptions struct {
 	Format      string `json:"format,omitempty"`
 	Mkdir       bool   `json:"mkdir,omitempty"`
 	Path        string `json:"path,omitempty"`
-}
-
-func (c *RESTClient) CreateStorage(name, storageType string, options StorageCreateOptions) (*Storage, error) {
-	options.Storage = name
-	options.StorageType = storageType
-	var storage *Storage
-	if err := c.Post("/storage", options, &storage); err != nil {
-		return nil, err
-	}
-	return storage, nil
 }

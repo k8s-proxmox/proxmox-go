@@ -1,4 +1,4 @@
-package proxmox
+package api
 
 type VirtualMachine struct {
 	Cpu       float32       `json:",omitempty"`

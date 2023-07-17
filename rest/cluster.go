@@ -1,4 +1,4 @@
-package proxmox
+package rest
 
 import (
 	"encoding/json"

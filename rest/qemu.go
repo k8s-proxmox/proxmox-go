@@ -1,19 +1,21 @@
-package proxmox
+package rest
 
 import (
 	"fmt"
+
+	"github.com/sp-yduck/proxmox-go/api"
 )
 
-func (c *RESTClient) GetVirtualMachines(node string) ([]*VirtualMachine, error) {
+func (c *RESTClient) GetVirtualMachines(node string) ([]*api.VirtualMachine, error) {
 	path := fmt.Sprintf("/nodes/%s/qemu", node)
-	var vms []*VirtualMachine
+	var vms []*api.VirtualMachine
 	if err := c.Get(path, &vms); err != nil {
 		return nil, err
 	}
 	return vms, nil
 }
 
-func (c *RESTClient) GetVirtualMachine(node string, vmid int) (*VirtualMachine, error) {
+func (c *RESTClient) GetVirtualMachine(node string, vmid int) (*api.VirtualMachine, error) {
 	vms, err := c.GetVirtualMachines(node)
 	if err != nil {
 		return nil, err
@@ -26,7 +28,7 @@ func (c *RESTClient) GetVirtualMachine(node string, vmid int) (*VirtualMachine, 
 	return nil, NotFoundErr
 }
 
-func (c *RESTClient) CreateVirtualMachine(node string, vmid int, options VirtualMachineCreateOptions) (*string, error) {
+func (c *RESTClient) CreateVirtualMachine(node string, vmid int, options api.VirtualMachineCreateOptions) (*string, error) {
 	options.VMID = vmid
 	path := fmt.Sprintf("/nodes/%s/qemu", node)
 	var upid *string
