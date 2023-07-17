@@ -3,7 +3,6 @@ package api
 type Task struct {
 	Endtime int `json:"endtime"`
 	// Id        string `json:"id,omitempty"`
-	Node      string `json:"node"`
 	PID       int    `json:"pid"`
 	PStart    int    `json:"pstart"`
 	StartTime int    `json:"starttime"`

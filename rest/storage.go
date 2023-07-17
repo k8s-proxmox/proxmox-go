@@ -1,6 +1,8 @@
 package rest
 
 import (
+	"fmt"
+
 	"github.com/sp-yduck/proxmox-go/api"
 )
 
@@ -33,4 +35,12 @@ func (c *RESTClient) CreateStorage(name, storageType string, options api.Storage
 		return nil, err
 	}
 	return storage, nil
+}
+
+func (c *RESTClient) DeleteStorage(name string) error {
+	path := fmt.Sprintf("/storage/%s", name)
+	if err := c.Delete(path, nil, nil); err != nil {
+		return err
+	}
+	return nil
 }

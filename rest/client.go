@@ -83,16 +83,21 @@ func withLogin() ClientOption {
 }
 
 func (c *RESTClient) Do(httpMethod, urlPath string, req, v interface{}) error {
-	jsonReq, err := json.Marshal(req)
-	if err != nil {
-		return err
-	}
-
 	url, err := url.JoinPath(c.endpoint, urlPath)
 	if err != nil {
 		return err
 	}
-	httpReq, err := http.NewRequest(httpMethod, url, bytes.NewReader(jsonReq))
+
+	var body io.Reader
+	if req != nil {
+		jsonReq, err := json.Marshal(req)
+		if err != nil {
+			return err
+		}
+		body = bytes.NewReader(jsonReq)
+	}
+
+	httpReq, err := http.NewRequest(httpMethod, url, body)
 	if err != nil {
 		return err
 	}
@@ -168,16 +173,17 @@ func checkResponse(res *http.Response) error {
 	if res.StatusCode >= 200 && res.StatusCode <= 299 {
 		return nil
 	}
-	if res.StatusCode == http.StatusInternalServerError || res.StatusCode == http.StatusNotImplemented {
-		return &Error{code: res.StatusCode, returnMessage: NotFound}
-	}
-	if res.StatusCode == http.StatusUnauthorized || res.StatusCode == http.StatusForbidden {
-		return &Error{code: res.StatusCode, returnMessage: NotAuthorized}
-	}
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return errors.Errorf("failed to read body while handling http response of status %d : %v", res.StatusCode, err)
+	}
+
+	if res.StatusCode == http.StatusInternalServerError || res.StatusCode == http.StatusNotImplemented {
+		return &Error{code: res.StatusCode, returnMessage: res.Status}
+	}
+	if res.StatusCode == http.StatusUnauthorized || res.StatusCode == http.StatusForbidden {
+		return &Error{code: res.StatusCode, returnMessage: NotAuthorized}
 	}
 
 	if res.StatusCode == http.StatusBadRequest {
