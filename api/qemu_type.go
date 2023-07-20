@@ -156,3 +156,89 @@ type VirtualMachineCreateOptions struct {
 	// vm id
 	VMID int `json:"vmid,omitempty"`
 }
+
+type VirtualMachineConfig struct {
+	// PVE Metadata
+	Digest      string `json:"digest"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+	Meta        string `json:"meta,omitempty"`
+	VMGenID     string `json:"vmgenid,omitempty"`
+	Hookscript  string `json:"hookscript,omitempty"`
+	Hotplug     string `json:"hotplug,omitempty"`
+	Template    int    `json:"template,omitempty"`
+
+	Tags string `json:"tags,omitempty"`
+
+	Protection int    `json:"protection,omitempty"`
+	Lock       string `json:"lock,omitempty"`
+
+	// Boot configuration
+	Boot   string `json:"boot,omitempty"`
+	OnBoot int    `json:"onboot,omitempty"`
+
+	// Qemu general specs
+	OSType  string `json:"ostype,omitempty"`
+	Machine string `json:"machine,omitempty"`
+	Args    string `json:"args,omitempty"`
+
+	// Qemu firmware specs
+	Bios     string `json:"bios,omitempty"`
+	EFIDisk0 string `json:"efidisk0,omitempty"`
+	SMBios1  string `json:"smbios1,omitempty"`
+	Acpi     int    `json:"acpi,omitempty"`
+
+	// Qemu CPU specs
+	Sockets  int    `json:"sockets,omitempty"`
+	Cores    int    `json:"cores,omitempty"`
+	CPU      string `json:"cpu,omitempty"`
+	CPULimit int    `json:"cpulimit,omitempty"`
+	CPUUnits int    `json:"cpuunits,omitempty"`
+	Vcpus    int    `json:"vcpus,omitempty"`
+	Affinity string `json:"affinity,omitempty"`
+
+	// Qemu memory specs
+	Numa      int    `json:"numa,omitempty"`
+	Memory    int    `json:"memory,omitempty"`
+	Hugepages string `json:"hugepages,omitempty"`
+	Balloon   int    `json:"balloon,omitempty"`
+
+	// Other Qemu devices
+	VGA       string `json:"vga,omitempty"`
+	SCSIHW    string `json:"scsihw,omitempty"`
+	TPMState0 string `json:"tpmstate0,omitempty"`
+	Rng0      string `json:"rng0,omitempty"`
+	Audio0    string `json:"audio0,omitempty"`
+
+	// Disk devices
+	Ide
+
+	Scsi
+
+	// Sata
+	// Virtio
+	// Unused
+
+	// Network devices
+	Net
+
+	// NUMA
+	// Host PCI devices HostPci
+
+	// Serial devices
+	Serial
+
+	// USB devices
+	// Parallel devices
+	// Cloud-init
+	CIType       string `json:"citype,omitempty"`
+	CIUser       string `json:"ciuser,omitempty"`
+	CIPassword   string `json:"cipassword,omitempty"`
+	Nameserver   string `json:"nameserver,omitempty"`
+	Searchdomain string `json:"searchdomain,omitempty"`
+	SSHKeys      string `json:"sshkeys,omitempty"`
+	CICustom     string `json:"cicustom,omitempty"`
+
+	// Cloud-init interfaces
+	// IPConfig
+}

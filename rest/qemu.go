@@ -46,3 +46,12 @@ func (c *RESTClient) DeleteVirtualMachine(node string, vmid int) (*string, error
 	}
 	return upid, nil
 }
+
+func (c *RESTClient) GetVirtualMachineConfig(node string, vmid int) (*api.VirtualMachineConfig, error) {
+	path := fmt.Sprintf("/nodes/%s/qemu/%d/config", node, vmid)
+	var config *api.VirtualMachineConfig
+	if err := c.Get(path, &config); err != nil {
+		return nil, err
+	}
+	return config, nil
+}
