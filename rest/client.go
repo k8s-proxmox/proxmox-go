@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -83,6 +84,12 @@ func withLogin() ClientOption {
 }
 
 func (c *RESTClient) Do(httpMethod, urlPath string, req, v interface{}) error {
+	if !strings.HasPrefix(c.endpoint, "http") {
+		c.endpoint = "http://" + c.endpoint
+	}
+	if !strings.HasSuffix(c.endpoint, "/api2/json") {
+		c.endpoint += "/api2/json"
+	}
 	url, err := url.JoinPath(c.endpoint, urlPath)
 	if err != nil {
 		return err
