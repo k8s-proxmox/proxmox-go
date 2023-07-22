@@ -13,8 +13,8 @@ import (
 
 type VirtualMachine struct {
 	restclient *rest.RESTClient
-	node       string
-	vm         *api.VirtualMachine
+	Node       string
+	VM         *api.VirtualMachine
 	config     *api.VirtualMachineConfig
 }
 
@@ -52,7 +52,7 @@ func (s *Service) NewVirtualMachine(ctx context.Context, vmid int) (*VirtualMach
 			}
 			return nil, err
 		}
-		return &VirtualMachine{restclient: s.restclient, vm: vm, node: node.Node}, nil
+		return &VirtualMachine{restclient: s.restclient, VM: vm, Node: node.Node}, nil
 	}
 	return nil, rest.NotFoundErr
 }
@@ -77,7 +77,7 @@ func (s *Service) VirtualMachineFromUUID(ctx context.Context, uuid string) (*Vir
 				return nil, err
 			}
 			if vmuuid == uuid {
-				return &VirtualMachine{restclient: s.restclient, vm: vm, node: node.Node, config: config}, nil
+				return &VirtualMachine{restclient: s.restclient, VM: vm, Node: node.Node, config: config}, nil
 			}
 		}
 	}
@@ -98,7 +98,7 @@ func (c *VirtualMachine) GetConfig(ctx context.Context) (*api.VirtualMachineConf
 	if c.config != nil {
 		return c.config, nil
 	}
-	config, err := c.restclient.GetVirtualMachineConfig(ctx, c.node, c.vm.VMID)
+	config, err := c.restclient.GetVirtualMachineConfig(ctx, c.Node, c.VM.VMID)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (c *VirtualMachine) GetConfig(ctx context.Context) (*api.VirtualMachineConf
 
 func (c *VirtualMachine) GetOSInfo(ctx context.Context) (*api.OSInfo, error) {
 	var osInfo *api.OSInfo
-	path := fmt.Sprintf("/nodes/%s/qemu/%d/agent/get-osinfo", c.node, c.vm.VMID)
+	path := fmt.Sprintf("/nodes/%s/qemu/%d/agent/get-osinfo", c.Node, c.VM.VMID)
 	if err := c.restclient.Get(ctx, path, &osInfo); err != nil {
 		return nil, err
 	}
