@@ -62,9 +62,6 @@ func complementURL(url string) string {
 	if !strings.HasPrefix(url, "http") {
 		url = "http://" + url
 	}
-	if !strings.HasSuffix(url, "/api2/json") {
-		url += "/api2/json"
-	}
 	return url
 }
 
