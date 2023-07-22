@@ -2,6 +2,7 @@ package rest
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -38,20 +40,32 @@ type ClientOption func(*RESTClient)
 
 func NewRESTClient(baseUrl string, opts ...ClientOption) (*RESTClient, error) {
 	client := &RESTClient{
-		endpoint:   baseUrl,
+		endpoint:   complementURL(baseUrl),
 		httpClient: &http.Client{},
 	}
+
 	for _, option := range opts {
 		option(client)
 	}
+
 	if client.token == "" && client.session == nil && client.credentials != nil {
-		var err error
-		client.session, err = client.PostTicket(*client.credentials)
-		if err != nil {
+		ctx, cancel := context.WithTimeout(context.TODO(), 1*time.Minute)
+		defer cancel()
+		if err := client.makeNewSession(ctx); err != nil {
 			return nil, err
 		}
 	}
 	return client, nil
+}
+
+func complementURL(url string) string {
+	if !strings.HasPrefix(url, "http") {
+		url = "http://" + url
+	}
+	if !strings.HasSuffix(url, "/api2/json") {
+		url += "/api2/json"
+	}
+	return url
 }
 
 func WithClient(client *http.Client) ClientOption {
@@ -78,18 +92,13 @@ func WithUserPassword(username, password string) ClientOption {
 	}
 }
 
-func withLogin() ClientOption {
+func WithAPIToken(tokenid, secret string) ClientOption {
 	return func(c *RESTClient) {
+		c.token = fmt.Sprintf("%s=%s", tokenid, secret)
 	}
 }
 
-func (c *RESTClient) Do(httpMethod, urlPath string, req, v interface{}) error {
-	if !strings.HasPrefix(c.endpoint, "http") {
-		c.endpoint = "http://" + c.endpoint
-	}
-	if !strings.HasSuffix(c.endpoint, "/api2/json") {
-		c.endpoint += "/api2/json"
-	}
+func (c *RESTClient) Do(ctx context.Context, httpMethod, urlPath string, req, v interface{}) error {
 	url, err := url.JoinPath(c.endpoint, urlPath)
 	if err != nil {
 		return err
@@ -104,7 +113,7 @@ func (c *RESTClient) Do(httpMethod, urlPath string, req, v interface{}) error {
 		body = bytes.NewReader(jsonReq)
 	}
 
-	httpReq, err := http.NewRequest(httpMethod, url, body)
+	httpReq, err := http.NewRequestWithContext(ctx, httpMethod, url, body)
 	if err != nil {
 		return err
 	}
@@ -138,20 +147,20 @@ func (c *RESTClient) Do(httpMethod, urlPath string, req, v interface{}) error {
 	return json.Unmarshal(buf, &v)
 }
 
-func (c *RESTClient) Get(path string, res interface{}) error {
-	return c.Do(http.MethodGet, path, nil, res)
+func (c *RESTClient) Get(ctx context.Context, path string, res interface{}) error {
+	return c.Do(ctx, http.MethodGet, path, nil, res)
 }
 
-func (c *RESTClient) Post(path string, req, res interface{}) error {
-	return c.Do(http.MethodPost, path, req, res)
+func (c *RESTClient) Post(ctx context.Context, path string, req, res interface{}) error {
+	return c.Do(ctx, http.MethodPost, path, req, res)
 }
 
-func (c *RESTClient) Put(path string, req, res interface{}) error {
-	return c.Do(http.MethodPut, path, req, res)
+func (c *RESTClient) Put(ctx context.Context, path string, req, res interface{}) error {
+	return c.Do(ctx, http.MethodPut, path, req, res)
 }
 
-func (c *RESTClient) Delete(path string, req, res interface{}) error {
-	return c.Do(http.MethodDelete, path, req, res)
+func (c *RESTClient) Delete(ctx context.Context, path string, req, res interface{}) error {
+	return c.Do(ctx, http.MethodDelete, path, req, res)
 }
 
 func (c *RESTClient) makeAuthHeaders() http.Header {
@@ -167,9 +176,9 @@ func (c *RESTClient) makeAuthHeaders() http.Header {
 	return header
 }
 
-func (c *RESTClient) makeNewSession() error {
+func (c *RESTClient) makeNewSession(ctx context.Context) error {
 	var err error
-	c.session, err = c.PostTicket(*c.credentials)
+	c.session, err = c.PostTicket(ctx, *c.credentials)
 	if err != nil {
 		return err
 	}

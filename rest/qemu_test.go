@@ -1,10 +1,14 @@
 package rest
 
-import "github.com/sp-yduck/proxmox-go/api"
+import (
+	"context"
+
+	"github.com/sp-yduck/proxmox-go/api"
+)
 
 func (s *TestSuite) TestGetVirtualMachines() {
 	nodeName := s.GetTestNode().Node
-	vms, err := s.restclient.GetVirtualMachines(nodeName)
+	vms, err := s.restclient.GetVirtualMachines(context.TODO(), nodeName)
 	if err != nil {
 		s.T().Fatalf("failed to get vms: %v", err)
 	}
@@ -13,7 +17,7 @@ func (s *TestSuite) TestGetVirtualMachines() {
 
 func (s *TestSuite) GetTestVM() *api.VirtualMachine {
 	nodeName := s.GetTestNode().Node
-	vms, err := s.restclient.GetVirtualMachines(nodeName)
+	vms, err := s.restclient.GetVirtualMachines(context.TODO(), nodeName)
 	if err != nil {
 		s.T().Fatalf("failed to get vms: %v", err)
 	}
@@ -23,7 +27,7 @@ func (s *TestSuite) GetTestVM() *api.VirtualMachine {
 func (s *TestSuite) TestGetVirtualMachine() {
 	nodeName := s.GetTestNode().Node
 	vmid := s.GetTestVM().VMID
-	vm, err := s.restclient.GetVirtualMachine(nodeName, vmid)
+	vm, err := s.restclient.GetVirtualMachine(context.TODO(), nodeName, vmid)
 	if err != nil {
 		s.T().Fatalf("failed to get vm: %v", err)
 	}
@@ -33,7 +37,7 @@ func (s *TestSuite) TestGetVirtualMachine() {
 func (s *TestSuite) TestGetVirtualMachineConfig() {
 	nodeName := s.GetTestNode().Node
 	vmid := s.GetTestVM().VMID
-	config, err := s.restclient.GetVirtualMachineConfig(nodeName, vmid)
+	config, err := s.restclient.GetVirtualMachineConfig(context.TODO(), nodeName, vmid)
 	if err != nil {
 		s.T().Fatalf("failed to get vm: %v", err)
 	}

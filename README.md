@@ -14,9 +14,13 @@ go test ./... -v -skip ^TestSuiteIntegration
 
 ### Integration Testing
 ```sh
-export PROXMOX_URL="http://localhost:8006/api2/json"
-export PROXMOX_USERNAME="root@pam"
-export PROXMOX_PASSWORD="password"
+export PROXMOX_URL='http://localhost:8006/api2/json'
+# tokenid & secret
+export PROXMOX_TOKENID='root@pam!your-token-id'
+export PROXMOX_SECRET='aaaaaaaaa-bbb-cccc-dddd-ef0123456789'
+# or username & password
+# export PROXMOX_USERNAME='root@pam'
+# export PROXMOX_PASSWORD='password'
 
 go test ./... -v -run ^TestSuiteIntegration
 ```

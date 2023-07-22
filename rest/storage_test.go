@@ -1,13 +1,14 @@
 package rest
 
 import (
+	"context"
 	"time"
 
 	"github.com/sp-yduck/proxmox-go/api"
 )
 
 func (s *TestSuite) TestGetStorages() {
-	storages, err := s.restclient.GetStorages()
+	storages, err := s.restclient.GetStorages(context.TODO())
 	if err != nil {
 		s.T().Fatalf("failed to get storages: %v", err)
 	}
@@ -15,7 +16,7 @@ func (s *TestSuite) TestGetStorages() {
 }
 
 func (s *TestSuite) GetTestStorage() *api.Storage {
-	storages, err := s.restclient.GetStorages()
+	storages, err := s.restclient.GetStorages(context.TODO())
 	if err != nil {
 		s.T().Fatalf("failed to get storages: %v", err)
 	}
@@ -25,7 +26,7 @@ func (s *TestSuite) GetTestStorage() *api.Storage {
 func (s *TestSuite) TestGetStorage() {
 	testStorageName := s.GetTestStorage().Storage
 
-	storage, err := s.restclient.GetStorage(testStorageName)
+	storage, err := s.restclient.GetStorage(context.TODO(), testStorageName)
 	if err != nil {
 		s.T().Fatalf("failed to get storage(name=%s): %v", testStorageName, err)
 	}
@@ -33,10 +34,10 @@ func (s *TestSuite) TestGetStorage() {
 }
 
 func (s *TestSuite) EnsureNoStorage(name string) {
-	storage, err := s.restclient.GetStorage(name)
+	storage, err := s.restclient.GetStorage(context.TODO(), name)
 	if err == nil {
 		s.T().Logf("error: %v", err)
-		if err := s.restclient.DeleteStorage(storage.Storage); err != nil {
+		if err := s.restclient.DeleteStorage(context.TODO(), storage.Storage); err != nil {
 			s.T().Fatalf("failed to ensure no storage (name=%s): %v", storage.Storage, err)
 		}
 		time.Sleep(2 * time.Second)
@@ -56,7 +57,7 @@ func (s *TestSuite) TestCreateDeleteStorage() {
 		Mkdir:   true,
 		Path:    "/var/lib/vz/test",
 	}
-	storage, err := s.restclient.CreateStorage(testStorageName, "dir", testOptions)
+	storage, err := s.restclient.CreateStorage(context.TODO(), testStorageName, "dir", testOptions)
 	if err != nil {
 		s.T().Fatalf("failed to create storage(name=%s): %v", testStorageName, err)
 	}
@@ -64,7 +65,7 @@ func (s *TestSuite) TestCreateDeleteStorage() {
 	time.Sleep(2 * time.Second)
 
 	// delete
-	err = s.restclient.DeleteStorage(testStorageName)
+	err = s.restclient.DeleteStorage(context.TODO(), testStorageName)
 	if err != nil {
 		s.T().Fatalf("failed to delete storage(name=%s): %v", testStorageName, err)
 	}

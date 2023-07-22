@@ -18,8 +18,20 @@ func (s *TestSuite) SetupSuite() {
 	url := os.Getenv("PROXMOX_URL")
 	user := os.Getenv("PROXMOX_USERNAME")
 	password := os.Getenv("PROXMOX_PASSWORD")
-	if url == "" || user == "" || password == "" {
-		s.T().Fatalf("following env var must not be empty: PROXMOX_URL=%s, POXMOX_USERNAME=%s, PROXOMOX_PASSWORD=%s", url, user, password)
+	tokeid := os.Getenv("PROXMOX_TOKENID")
+	secret := os.Getenv("PROXMOX_SECRET")
+	if url == "" {
+		s.T().Fatal("url must not be empty")
+	}
+
+	var loginOption ClientOption
+	if user != "" && password != "" {
+		loginOption = WithUserPassword(user, password)
+	} else if tokeid != "" && secret != "" {
+		loginOption = WithAPIToken(tokeid, secret)
+	} else {
+		s.T().Logf("username=%s, password=%s, tokenid=%s, secret=%s", user, password, tokeid, secret)
+		s.T().Fatal("username&password or tokeid&secret pair must be provided")
 	}
 
 	base := http.Client{
@@ -30,11 +42,9 @@ func (s *TestSuite) SetupSuite() {
 		},
 	}
 
-	restclient, err := NewRESTClient(url, WithUserPassword(user, password), WithClient(&base))
+	restclient, err := NewRESTClient(url, loginOption, WithClient(&base))
 	if err != nil {
-		s.T().Logf("url=%s", url)
-		s.T().Logf("user=%s", user)
-		s.T().Logf("password=%s", password)
+		s.T().Logf("username=%s, password=%s, tokenid=%s, secret=%s", user, password, tokeid, secret)
 		s.T().Fatalf("failed to create rest client: %v", err)
 	}
 
