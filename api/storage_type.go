@@ -1,5 +1,9 @@
 package api
 
+import (
+	"encoding/json"
+)
+
 type Storage struct {
 	Active       int
 	Avail        int
@@ -25,4 +29,21 @@ type StorageCreateOptions struct {
 	Format      string `json:"format,omitempty"`
 	Mkdir       bool   `json:"mkdir,omitempty"`
 	Path        string `json:"path,omitempty"`
+}
+
+type StorageContent struct {
+	Storage string `json:",omitempty"`
+	Content string `json:",omitempty"`
+	// to do : use custom type instead of json.Number
+	CTime     json.Number `json:",omitempty"`
+	Encrypted string
+	Format    string
+	Notes     string
+	Parent    string
+	Protected bool
+	Size      int
+	Used      int
+	// to do : Verificateion
+	VMID  int
+	VolID string `josn:"volid,omitempty"`
 }
