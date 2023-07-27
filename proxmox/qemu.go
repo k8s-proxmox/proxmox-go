@@ -39,7 +39,7 @@ func (s *Service) VirtualMachines(ctx context.Context) ([]*api.VirtualMachine, e
 	return vms, nil
 }
 
-func (s *Service) NewVirtualMachine(ctx context.Context, vmid int) (*VirtualMachine, error) {
+func (s *Service) VirtualMachine(ctx context.Context, vmid int) (*VirtualMachine, error) {
 	nodes, err := s.Nodes(ctx)
 	if err != nil {
 		return nil, err
