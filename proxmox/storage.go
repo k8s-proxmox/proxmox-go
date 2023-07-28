@@ -61,3 +61,22 @@ func (s *Storage) GetContent(ctx context.Context, volumeID string) (*api.Storage
 	}
 	return nil, rest.NotFoundErr
 }
+
+func (s *Storage) GetVolume(ctx context.Context, volumeID string) (*api.StorageVolume, error) {
+	path := fmt.Sprintf("/nodes/%s/storage/%s/content/%s", s.Node, s.Storage.Storage, volumeID)
+	var volume *api.StorageVolume
+	if err := s.restclient.Get(ctx, path, &volume); err != nil {
+		return nil, err
+	}
+	return volume, nil
+}
+
+// to do : taskid
+func (s *Storage) DeleteVolume(ctx context.Context, volumeID string) error {
+	path := fmt.Sprintf("/nodes/%s/storage/%s/content/%s", s.Node, s.Storage.Storage, volumeID)
+	var taskid string
+	if err := s.restclient.Delete(ctx, path, nil, &taskid); err != nil {
+		return err
+	}
+	return nil
+}

@@ -12,6 +12,7 @@ import (
 )
 
 type VirtualMachine struct {
+	service    *Service
 	restclient *rest.RESTClient
 	Node       string
 	VM         *api.VirtualMachine
@@ -52,9 +53,20 @@ func (s *Service) VirtualMachine(ctx context.Context, vmid int) (*VirtualMachine
 			}
 			return nil, err
 		}
-		return &VirtualMachine{restclient: s.restclient, VM: vm, Node: node.Node}, nil
+		return &VirtualMachine{service: s, restclient: s.restclient, VM: vm, Node: node.Node}, nil
 	}
 	return nil, rest.NotFoundErr
+}
+
+func (s *Service) CreateVirtualMachine(ctx context.Context, node string, vmid int, option api.VirtualMachineCreateOptions) (*VirtualMachine, error) {
+	taskid, err := s.restclient.CreateVirtualMachine(ctx, node, vmid, option)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.EnsureTaskDone(ctx, node, *taskid); err != nil {
+		return nil, err
+	}
+	return s.VirtualMachine(ctx, vmid)
 }
 
 func (s *Service) VirtualMachineFromUUID(ctx context.Context, uuid string) (*VirtualMachine, error) {
@@ -72,19 +84,19 @@ func (s *Service) VirtualMachineFromUUID(ctx context.Context, uuid string) (*Vir
 			if err != nil {
 				return nil, err
 			}
-			vmuuid, err := convertSMBiosToUUID(config.SMBios1)
+			vmuuid, err := ConvertSMBiosToUUID(config.SMBios1)
 			if err != nil {
 				return nil, err
 			}
 			if vmuuid == uuid {
-				return &VirtualMachine{restclient: s.restclient, VM: vm, Node: node.Node, config: config}, nil
+				return &VirtualMachine{service: s, restclient: s.restclient, VM: vm, Node: node.Node, config: config}, nil
 			}
 		}
 	}
 	return nil, rest.NotFoundErr
 }
 
-func convertSMBiosToUUID(smbios string) (string, error) {
+func ConvertSMBiosToUUID(smbios string) (string, error) {
 	re := regexp.MustCompile(fmt.Sprintf("uuid=%s", UUIDFormat))
 	match := re.FindString(smbios)
 	if match == "" {
@@ -92,6 +104,15 @@ func convertSMBiosToUUID(smbios string) (string, error) {
 	}
 	// match: uuid=<uuid>
 	return strings.Split(match, "=")[1], nil
+}
+
+func (c *VirtualMachine) Delete(ctx context.Context) error {
+	path := fmt.Sprintf("/nodes/%s/qemu/%d", c.Node, c.VM.VMID)
+	var upid string
+	if err := c.restclient.Delete(ctx, path, nil, &upid); err != nil {
+		return err
+	}
+	return c.service.EnsureTaskDone(ctx, c.Node, upid)
 }
 
 func (c *VirtualMachine) GetConfig(ctx context.Context) (*api.VirtualMachineConfig, error) {
@@ -113,4 +134,47 @@ func (c *VirtualMachine) GetOSInfo(ctx context.Context) (*api.OSInfo, error) {
 		return nil, err
 	}
 	return osInfo, nil
+}
+
+// size : The new size. With the `+` sign the value is added to the actual size of the volume
+// and without it, the value is taken as an absolute one.
+// Shrinking disk size is not supported.
+// size format : \+?\d+(\.\d+)?[KMGT]?j
+func (c *VirtualMachine) ResizeVolume(ctx context.Context, disk, size string) error {
+	path := fmt.Sprintf("/nodes/%s/qemu/%d/resize", c.Node, c.VM.VMID)
+	request := make(map[string]interface{})
+	request["disk"] = disk
+	request["size"] = size
+	var v interface{}
+	if err := c.restclient.Put(ctx, path, request, &v); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *VirtualMachine) Start(ctx context.Context) error {
+	path := fmt.Sprintf("/nodes/%s/qemu/%d/status/start", c.Node, c.VM.VMID)
+	var upid string
+	if err := c.restclient.Post(ctx, path, nil, &upid); err != nil {
+		return err
+	}
+	return c.service.EnsureTaskDone(ctx, c.Node, upid)
+}
+
+func (c *VirtualMachine) Stop(ctx context.Context) error {
+	path := fmt.Sprintf("/nodes/%s/qemu/%d/status/stop", c.Node, c.VM.VMID)
+	var upid string
+	if err := c.restclient.Post(ctx, path, nil, &upid); err != nil {
+		return err
+	}
+	return c.service.EnsureTaskDone(ctx, c.Node, upid)
+}
+
+func (c *VirtualMachine) Resume(ctx context.Context) error {
+	path := fmt.Sprintf("/nodes/%s/qemu/%d/status/resume", c.Node, c.VM.VMID)
+	var upid string
+	if err := c.restclient.Post(ctx, path, nil, &upid); err != nil {
+		return err
+	}
+	return c.service.EnsureTaskDone(ctx, c.Node, upid)
 }
