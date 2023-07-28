@@ -47,3 +47,10 @@ type StorageContent struct {
 	VMID  int
 	VolID string `josn:"volid,omitempty"`
 }
+
+type StorageVolume struct {
+	Format string `json:",omitempty"`
+	Path   string `json:",omitempty"`
+	Size   int    `json:",omitempty"`
+	Used   int    `json:",omitempty"`
+}
