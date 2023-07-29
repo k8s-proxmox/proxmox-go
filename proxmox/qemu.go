@@ -152,28 +152,28 @@ func (c *VirtualMachine) ResizeVolume(ctx context.Context, disk, size string) er
 	return nil
 }
 
-func (c *VirtualMachine) Start(ctx context.Context) error {
+func (c *VirtualMachine) Start(ctx context.Context, option api.VirtualMachineStartOption) error {
 	path := fmt.Sprintf("/nodes/%s/qemu/%d/status/start", c.Node, c.VM.VMID)
 	var upid string
-	if err := c.restclient.Post(ctx, path, nil, &upid); err != nil {
+	if err := c.restclient.Post(ctx, path, option, &upid); err != nil {
 		return err
 	}
 	return c.service.EnsureTaskDone(ctx, c.Node, upid)
 }
 
-func (c *VirtualMachine) Stop(ctx context.Context) error {
+func (c *VirtualMachine) Stop(ctx context.Context, option api.VirtualMachineStopOption) error {
 	path := fmt.Sprintf("/nodes/%s/qemu/%d/status/stop", c.Node, c.VM.VMID)
 	var upid string
-	if err := c.restclient.Post(ctx, path, nil, &upid); err != nil {
+	if err := c.restclient.Post(ctx, path, option, &upid); err != nil {
 		return err
 	}
 	return c.service.EnsureTaskDone(ctx, c.Node, upid)
 }
 
-func (c *VirtualMachine) Resume(ctx context.Context) error {
+func (c *VirtualMachine) Resume(ctx context.Context, option api.VirtualMachineResumeOption) error {
 	path := fmt.Sprintf("/nodes/%s/qemu/%d/status/resume", c.Node, c.VM.VMID)
 	var upid string
-	if err := c.restclient.Post(ctx, path, nil, &upid); err != nil {
+	if err := c.restclient.Post(ctx, path, option, &upid); err != nil {
 		return err
 	}
 	return c.service.EnsureTaskDone(ctx, c.Node, upid)

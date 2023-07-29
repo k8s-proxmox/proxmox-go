@@ -22,9 +22,15 @@ func (e *Error) Error() string {
 }
 
 func IsNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
 	return err.Error() == NotFound
 }
 
 func IsNotAuthorized(err error) bool {
+	if err == nil {
+		return false
+	}
 	return err.Error() == NotAuthorized
 }
