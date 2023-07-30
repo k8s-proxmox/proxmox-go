@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
@@ -62,6 +61,7 @@ func complementURL(url string) string {
 	if !strings.HasPrefix(url, "http") {
 		url = "http://" + url
 	}
+	url, _ = strings.CutSuffix(url, "/")
 	return url
 }
 
@@ -96,10 +96,7 @@ func WithAPIToken(tokenid, secret string) ClientOption {
 }
 
 func (c *RESTClient) Do(ctx context.Context, httpMethod, urlPath string, req, v interface{}) error {
-	url, err := url.JoinPath(c.endpoint, urlPath)
-	if err != nil {
-		return err
-	}
+	endpoint := c.endpoint + urlPath
 
 	var body io.Reader
 	if req != nil {
@@ -110,7 +107,7 @@ func (c *RESTClient) Do(ctx context.Context, httpMethod, urlPath string, req, v 
 		body = bytes.NewReader(jsonReq)
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, httpMethod, url, body)
+	httpReq, err := http.NewRequestWithContext(ctx, httpMethod, endpoint, body)
 	if err != nil {
 		return err
 	}
@@ -162,7 +159,6 @@ func (c *RESTClient) Delete(ctx context.Context, path string, req, res interface
 
 func (c *RESTClient) makeAuthHeaders() http.Header {
 	header := make(http.Header)
-	// header.Add("User-Agent", c.userAgent)
 	header.Add("Accept", "application/json")
 	if c.token != "" {
 		header.Add("Authorization", fmt.Sprintf("PVEAPIToken=%s", c.token))
