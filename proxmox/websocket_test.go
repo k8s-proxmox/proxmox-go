@@ -43,6 +43,21 @@ func (s *TestSuite) TestExec() {
 	s.T().Logf("exec command : %s : %d", out, code)
 }
 
+func (s *TestSuite) TestWriteFile() {
+	testNode := s.getTestNode()
+	client, err := s.service.NewNodeVNCWebSocketConnection(context.TODO(), testNode.Node)
+	if err != nil {
+		s.T().Fatalf("failed to create new vnc client: %v", err)
+	}
+	defer client.Close()
+
+	ctx, _ := context.WithTimeout(context.TODO(), 15*time.Second)
+	err = client.WriteFile(ctx, "this is a file content", "~/test-write-file.txt")
+	if err != nil {
+		s.T().Fatalf("failed to exec command: %v", err)
+	}
+}
+
 func TestParseFinMessage(t *testing.T) {
 	testMsg := " daf" + finMessage + "123\n"
 	if parseFinMessage(testMsg) == "" {

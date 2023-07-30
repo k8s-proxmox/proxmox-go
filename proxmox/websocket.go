@@ -2,10 +2,12 @@ package proxmox
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -19,7 +21,8 @@ const (
 )
 
 type VNCWebSocketClient struct {
-	conn *websocket.Conn
+	conn   *websocket.Conn
+	ticker *time.Ticker
 }
 
 func (s *Service) NewNodeVNCWebSocketConnection(ctx context.Context, nodeName string) (*VNCWebSocketClient, error) {
@@ -32,11 +35,22 @@ func (s *Service) NewNodeVNCWebSocketConnection(ctx context.Context, nodeName st
 		return nil, err
 	}
 
-	return &VNCWebSocketClient{conn: conn}, nil
+	ticker := time.NewTicker(30 * time.Second)
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				conn.WriteMessage(websocket.BinaryMessage, []byte("2"))
+			}
+		}
+	}()
+
+	return &VNCWebSocketClient{conn: conn, ticker: ticker}, nil
 }
 
 func (c *VNCWebSocketClient) Close() {
 	c.conn.Close()
+	c.ticker.Stop()
 }
 
 func (c *VNCWebSocketClient) Write(cmd string) error {
@@ -47,6 +61,38 @@ func (c *VNCWebSocketClient) Write(cmd string) error {
 		return err
 	}
 	return c.sendFinMessage()
+}
+
+func (c *VNCWebSocketClient) WriteFile(ctx context.Context, content, path string) error {
+	c.Exec(ctx, fmt.Sprintf("rm %s", path))
+	if _, _, err := c.Exec(ctx, fmt.Sprintf("touch %s", path)); err != nil {
+		return err
+	}
+	chunks := chunkString(content, 3000)
+	for _, chunk := range chunks {
+		b64chunk := base64.StdEncoding.EncodeToString([]byte(chunk))
+		_, _, err := c.Exec(ctx, fmt.Sprintf("echo %s | base64 -d >> %s", b64chunk, path))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func chunkString(s string, chunkSize int) []string {
+	var chunks []string
+	runes := []rune(s)
+	if len(runes) == 0 {
+		return []string{s}
+	}
+	for i := 0; i < len(runes); i += chunkSize {
+		nn := i + chunkSize
+		if nn > len(runes) {
+			nn = len(runes)
+		}
+		chunks = append(chunks, string(runes[i:nn]))
+	}
+	return chunks
 }
 
 func (c *VNCWebSocketClient) sendFinMessage() error {
