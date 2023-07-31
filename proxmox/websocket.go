@@ -65,15 +65,15 @@ func (c *VNCWebSocketClient) Write(cmd string) error {
 
 func (c *VNCWebSocketClient) WriteFile(ctx context.Context, content, path string) error {
 	c.Exec(ctx, fmt.Sprintf("rm %s", path))
-	if _, _, err := c.Exec(ctx, fmt.Sprintf("touch %s", path)); err != nil {
-		return err
+	if out, _, err := c.Exec(ctx, fmt.Sprintf("touch %s", path)); err != nil {
+		return errors.Wrap(err, out)
 	}
-	chunks := chunkString(content, 3000)
+	chunks := chunkString(content, 2000)
 	for _, chunk := range chunks {
 		b64chunk := base64.StdEncoding.EncodeToString([]byte(chunk))
-		_, _, err := c.Exec(ctx, fmt.Sprintf("echo %s | base64 -d >> %s", b64chunk, path))
+		out, _, err := c.Exec(ctx, fmt.Sprintf("echo %s | base64 -d >> %s", b64chunk, path))
 		if err != nil {
-			return err
+			return errors.Wrap(err, out)
 		}
 	}
 	return nil
