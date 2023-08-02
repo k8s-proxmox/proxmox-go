@@ -252,7 +252,7 @@ type VirtualMachineConfig struct {
 	// Use volume as IDE hard disk or CD-ROM (n is 0 to 3).
 	// Use the special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume.
 	// Use STORAGE_ID:0 and the 'import-from' parameter to import from an existing volume.
-	Ide
+	Ide `json:"-"`
 	IPConfig
 	IvshMem       string `json:"ivshmem,omitempty"`
 	KeepHugePages Bool   `json:"keephugepages,omitempty"`
@@ -272,30 +272,30 @@ type VirtualMachineConfig struct {
 	// cloud-init: Sets DNS server IP address for a container. Create will automatically use the setting from the host if neither searchdomain nor nameserver are set.
 	NameServer string `json:"nameserver,omitempty"`
 	// network device
-	Net
+	Net  `json:"-"`
 	Numa int8 `json:"numa,omitempty"`
 	// specifies whether a VM will be started during system bootup
 	OnBoot Bool `json:"onboot,omitempty"`
 	// quest OS
-	OSType OSType `json:"ostype,omitempty"`
-	Parallel
+	OSType     OSType `json:"ostype,omitempty"`
+	Parallel   `json:"-"`
 	Protection Bool `json:"protection,omitempty"`
 	// Allow reboot. if set to '0' the VM exit on reboot
 	Reboot int    `json:"reboot,omitempty"`
 	RNG0   string `json:"rng0,omitempty"`
-	Sata
+	Sata   `json:"-"`
 	// use volume as scsi hard disk or cd-rom
 	// use special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume
 	// use STORAGE_ID:0 and the 'import-from' parameter to import from an existing volume.
-	Scsi
+	Scsi `json:"-"`
 	// SCSI controller model
 	ScsiHw ScsiHw `json:"scsihw,omitempty"`
 	// cloud-init: Sets DNS search domains for a container. Create will automatically use the setting from the host if neither searchdomain nor nameserver are set.
 	SearchDomain string `json:"searchdomain,omitempty"`
-	Serial
-	Shares  int    `json:"shares,omitempty"`
-	SMBios1 string `json:"smbios1,omitempty"`
-	SMP     int    `json:"smp,omitempty"`
+	Serial       `json:"-"`
+	Shares       int    `json:"shares,omitempty"`
+	SMBios1      string `json:"smbios1,omitempty"`
+	SMP          int    `json:"smp,omitempty"`
 	// number of sockets
 	Sockets           int    `json:"sockets,omitempty"`
 	SpiceEnhancements string `json:"spice_enhancements,omitempty"`
@@ -308,12 +308,12 @@ type VirtualMachineConfig struct {
 	Tags string `json:"tags,omitempty"`
 	TDF  Bool   `json:"tdf,omitempty"`
 	// enable/disable template
-	Template  Bool   `json:"template,omitempty"`
-	TPMState0 string `json:"tpmstate,omitempty"`
-	UnUsed
-	VCPUs int    `json:"vcpus,omitempty"`
-	VGA   string `json:"vga,omitempty"`
-	VirtIO
+	Template       Bool   `json:"template,omitempty"`
+	TPMState0      string `json:"tpmstate,omitempty"`
+	UnUsed         `json:"-"`
+	VCPUs          int    `json:"vcpus,omitempty"`
+	VGA            string `json:"vga,omitempty"`
+	VirtIO         `json:"-"`
 	VMGenID        string `json:"vmgenid,omitempty"`
 	VMStateStorage string `json:"vmstatestorage,omitempty"`
 	WatchDog       string `json:"watchdog,omitempty"`
