@@ -252,8 +252,8 @@ type VirtualMachineConfig struct {
 	// Use volume as IDE hard disk or CD-ROM (n is 0 to 3).
 	// Use the special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume.
 	// Use STORAGE_ID:0 and the 'import-from' parameter to import from an existing volume.
-	Ide `json:"-"`
-	IPConfig
+	Ide           `json:"-"`
+	IPConfig      `json:"-"`
 	IvshMem       string `json:"ivshmem,omitempty"`
 	KeepHugePages Bool   `json:"keephugepages,omitempty"`
 	Keyboard      string `json:"keyboard,omitempty"`
