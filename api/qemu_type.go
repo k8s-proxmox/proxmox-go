@@ -241,7 +241,7 @@ type VirtualMachineConfig struct {
 	// CPU weight for a VM. Argument is used in the kernel fair scheduler.
 	// The larger the number is, the more CPU time this VM gets.
 	// Number is relative to weights of all the other running VMs.
-	CpuUnits    int    `json:"cpuunits"`
+	CpuUnits    int    `json:"cpuunits,omitempty"`
 	Description string `json:"description,omitempty"`
 	EfiDisk0    Bool   `json:"efidisk0,omitempty"`
 	Freeze      Bool   `json:"freeze,omitempty"`
