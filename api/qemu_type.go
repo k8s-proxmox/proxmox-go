@@ -123,54 +123,120 @@ const (
 	False Bool = 0
 )
 
-// wip
 // reference : https://pve.proxmox.com/pve-docs/api-viewer/#/nodes/{node}/qemu
 type VirtualMachineCreateOptions struct {
-	Acpi     Bool   `json:"acpi,omitempty"`
+	// Enable/disable ACPI.
+	ACPI Bool `json:"acpi,omitempty"`
+	// List of host cores used to execute guest processes, for example: 0,5,8-11
 	Affinity string `json:"affinity,omitempty"`
-	Agent    string `json:"agent,omitempty"`
-	Arch     Arch   `json:"arch,omitempty"`
+	// Enable/disable communication with the QEMU Guest Agent and its properties.
+	Agent string `json:"agent,omitempty"`
+	// Virtual processor architecture. Defaults to the host.
+	Arch Arch `json:"arch,omitempty"`
+	// The backup archive. Either the file system path to a .tar or .vma file
+	// (use '-' to pipe data from stdin) or a proxmox storage backup volume identifier.
+	Archive string `json:"archive,omitempty"`
+	// Arbitrary arguments passed to kvm, for example:
+	// args: -no-reboot -no-hpet
+	// NOTE: this option is for experts only.
+	Args string `json:"args,omitempty"`
+	// Configure a audio device, useful in combination with QXL/Spice.
+	Audio0 string `json:"audio0,omitempty"`
+	// Automatic restart after crash (currently ignored).
+	AutoStart Bool `json:"autostart,omitempty"`
+	// Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.
+	Balloon int `json:"balloon,omitempty"`
+	// Select BIOS implementation.
+	BIOS string `json:"bios,omitempty"`
 	// boot order. ";" separated. : 'order=device1;device2;device3'
 	Boot string `json:"boot,omitempty"`
-	// cloud-init custom files
-	CiCustom   string `json:"cicustom,omitempty"`
+	// Override I/O bandwidth limit (in KiB/s).
+	BWLimit int `json:"bwlimit,omitempty"`
+	// This is an alias for option -ide2
+	CDRom string `json:"cdrom,omitempty"`
+	// cloud-init: Specify custom files to replace the automatically generated ones at start.
+	CiCustom string `json:"cicustom,omitempty"`
+	// cloud-init: Password to assign the user. Using this is generally not recommended.
+	// Use ssh keys instead. Also note that older cloud-init versions do not support hashed passwords.
 	CiPassword string `json:"cipassword,omitempty"`
-	CiType     string `json:"citype,omitempty"`
-	CiUser     string `json:"ciuser,omitempty"`
-	// number of cores : 1 ~
+	// Specifies the cloud-init configuration format.
+	// The default depends on the configured operating system type (`ostype`.
+	// We use the `nocloud` format for Linux, and `configdrive2` for windows.
+	CiType string `json:"citype,omitempty"`
+	// cloud-init: do an automatic package upgrade after the first boot.
+	CiUpgrate Bool `json:"ciupgrade,omitempty"`
+	// cloud-init: User name to change ssh keys and password for instead of the image's configured default user.
+	CiUser string `json:"ciuser,omitempty"`
+	// The number of cores per socket. : 1 ~
 	Cores int `json:"cores,omitempty"`
 	// emulated cpu type
 	Cpu string `json:"cpu,omitempty"`
-	// limit of cpu usage : 0 ~
-	// 0 indicated no limit
-	CpuLimit    int    `json:"cpulimit,omitempty"`
+	// Limit of CPU usage.
+	// NOTE: If the computer has 2 CPUs, it has total of '2' CPU time. Value '0' indicates no CPU limit.
+	CpuLimit int `json:"cpulimit,omitempty"`
+	// CPU weight for a VM. Argument is used in the kernel fair scheduler.
+	// The larger the number is, the more CPU time this VM gets.
+	// Number is relative to weights of all the other running VMs.
+	CpuUnits int `json:"cpuunits,omitempty"`
+	// Description for the VM. Shown in the web-interface VM's summary.
+	// This is saved as comment inside the configuration file.
 	Description string `json:"description,omitempty"`
-
-	// allow to overwrite existing VM
+	// Configure a disk for storing EFI vars. Use the special syntax STORAGE_ID:SIZE_IN_GiB
+	// to allocate a new volume. Note that SIZE_IN_GiB is ignored here and that the default
+	// EFI vars are copied to the volume instead. Use STORAGE_ID:0 and the 'import-from'
+	// parameter to import from an existing volume.
+	EfiDisk0 Bool `json:"efidisk0,omitempty"`
+	// Allow to overwrite existing VM.
 	Force Bool `json:"force,omitempty"`
+	// Freeze CPU at startup (use 'c' monitor command to start execution).
+	Freeze Bool `json:"freeze,omitempty"`
+	// Script that will be executed during various steps in the vms lifetime.
+	HookScript string `json:"hookscript,omitempty"`
+	// HostPci
+	// Selectively enable hotplug features. This is a comma separated list of hotplug features: 'network', 'disk', 'cpu', 'memory', 'usb' and 'cloudinit'.
+	// Use '0' to disable hotplug completely. Using '1' as value is an alias for the default `network,disk,usb`.
+	// USB hotplugging is possible for guests with machine version >= 7.1 and ostype l26 or windows > 7.
+	HotPlug string `json:"hotplug,omitempty"`
+	// Enable/disable hugepages memory.
+	HugePages string `json:"hugepages,omitempty"`
 	// Use volume as IDE hard disk or CD-ROM (n is 0 to 3).
 	// Use the special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume.
 	// Use STORAGE_ID:0 and the 'import-from' parameter to import from an existing volume.
 	Ide
 	IPConfig
+	// Inter-VM shared memory. Useful for direct communication between VMs, or to the host.
+	IVshMem       string `json:"ivshmem,omitempty"`
+	KeepHugePages Bool   `json:"keephugepages,omitempty"`
+	Keyboard      string `json:"keyboard,omitempty"`
 	// enable/disable KVM hardware virtualization
-	Kvm Bool `json:"kvm,omitempty"`
+	KVM         Bool   `json:"kvm,omitempty"`
+	LiveRestore Bool   `json:"live-restore,omitempty"`
+	LocalTime   Bool   `json:"localtime,omitempty"`
+	Lock        string `json:"lock,omitempty"`
 	// specifies the QEMU machine type
 	Machine string `json:"machine,omitempty"`
 	// amount of RAM for the VM in MiB : 16 ~
-	Memory int `json:"memory,omitempty"`
+	Memory          int         `json:"memory,omitempty"`
+	MigrateDowntime json.Number `json:"migrate_downtime,omitempty"`
+	MigrateSpeed    int         `json:"migrate_speed,omitempty"`
 	// name for VM. Only used on the configuration web interface
 	Name string `json:"name,omitempty"`
 	// cloud-init: Sets DNS server IP address for a container. Create will automatically use the setting from the host if neither searchdomain nor nameserver are set.
 	NameServer string `json:"nameserver,omitempty"`
 	// network device
 	Net
+	Numa int8 `json:"numa,omitempty"`
 	// specifies whether a VM will be started during system bootup
 	OnBoot Bool `json:"onboot,omitempty"`
 	// quest OS
 	OSType OSType `json:"ostype,omitempty"`
+	Parallel
+	Pool       string `json:"pool,omitempty"`
+	Protection Bool   `json:"protection,omitempty"`
 	// Allow reboot. if set to '0' the VM exit on reboot
-	Reboot int `json:"reboot,omitempty"`
+	Reboot int    `json:"reboot,omitempty"`
+	RNG0   string `json:"rng0,omitempty"`
+	Sata
 	// use volume as scsi hard disk or cd-rom
 	// use special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume
 	// use STORAGE_ID:0 and the 'import-from' parameter to import from an existing volume.
@@ -179,20 +245,34 @@ type VirtualMachineCreateOptions struct {
 	ScsiHw ScsiHw `json:"scsihw,omitempty"`
 	// cloud-init: Sets DNS search domains for a container. Create will automatically use the setting from the host if neither searchdomain nor nameserver are set.
 	SearchDomain string `json:"searchdomain,omitempty"`
-	Serial
+	Serial       `json:"-"`
+	Shares       int    `json:"shares,omitempty"`
+	SMBios1      string `json:"smbios1,omitempty"`
+	SMP          int    `json:"smp,omitempty"`
 	// number of sockets
-	Sockets int `json:"sockets,omitempty"`
+	Sockets           int    `json:"sockets,omitempty"`
+	SpiceEnhancements string `json:"spice_enhancements,omitempty"`
 	// cloud-init setup public ssh keys (one key per line, OpenSSH format)
-	SSHKeys string `json:"sshkeys,omitempty"`
-	// start VM after it was created successfully
-	Start Bool `json:"start,omitempty"`
+	SSHKeys   string `json:"sshkeys,omitempty"`
+	StartDate string `json:"startdate,omitempty"`
+	StartUp   Bool   `json:"startup,omitempty"`
+	Storage   string `json:"storage,omitempty"`
+	Tablet    Bool   `json:"tablet,omitempty"`
 	// tags of the VM. only for meta information
 	Tags string `json:"tags,omitempty"`
+	TDF  Bool   `json:"tdf,omitempty"`
 	// enable/disable template
-	Template Bool   `json:"template,omitempty"`
-	VGA      string `json:"vga,omitempty"`
-	// vm id
-	VMID int `json:"vmid,omitempty"`
+	Template  Bool   `json:"template,omitempty"`
+	TPMState0 string `json:"tpmstate,omitempty"`
+	UnUsed
+	USB
+	VCPUs int    `json:"vcpus,omitempty"`
+	VGA   string `json:"vga,omitempty"`
+	VirtIO
+	VMGenID        string `json:"vmgenid,omitempty"`
+	VMID           int    `json:"vmid,omitempty"`
+	VMStateStorage string `json:"vmstatestorage,omitempty"`
+	WatchDog       string `json:"watchdog,omitempty"`
 }
 
 type VirtualMachineConfig struct {

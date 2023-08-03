@@ -15,6 +15,20 @@ func (s *TestSuite) TestVirtualMachine() {
 	s.Assert().Equal(*vm, *testVM)
 }
 
+func (s *TestSuite) TestCreateVirtualMachine() {
+	testNode := s.getTestNode()
+	testVMID, err := s.service.RESTClient().GetNextID(context.TODO())
+	if err != nil {
+		s.T().Fatalf("failed to get next id: %v", err)
+	}
+	option := api.VirtualMachineCreateOptions{}
+	vm, err := s.service.CreateVirtualMachine(context.TODO(), testNode.Node, testVMID, option)
+	if err != nil {
+		s.T().Fatalf("failed to create vm: %v", err)
+	}
+	s.T().Logf("create vm : %v", *vm)
+}
+
 func (s *TestSuite) TestStop() {
 	_, testVM := s.getTestVirtualMachine()
 	if err := testVM.Stop(context.TODO(), api.VirtualMachineStopOption{}); err != nil {
@@ -31,8 +45,8 @@ func (s *TestSuite) getTestNode() *api.Node {
 }
 
 func (s *TestSuite) getTestVirtualMachine() (*api.Node, *VirtualMachine) {
-	node := s.getTestNode()
-	vms, err := s.service.restclient.GetVirtualMachines(context.TODO(), node.Node)
+	testNode := s.getTestNode()
+	vms, err := s.service.restclient.GetVirtualMachines(context.TODO(), testNode.Node)
 	if err != nil {
 		s.T().Fatalf("failed to get vms: %v", err)
 	}
@@ -40,5 +54,14 @@ func (s *TestSuite) getTestVirtualMachine() (*api.Node, *VirtualMachine) {
 	if err != nil {
 		s.T().Fatalf("failed to get vm: %v", err)
 	}
-	return node, vm
+	return nil, vm
+}
+
+func (s *TestSuite) TestGetConfig() {
+	_, vm := s.getTestVirtualMachine()
+	config, err := vm.GetConfig(context.TODO())
+	if err != nil {
+		s.T().Fatalf("failed to get vm config: %v", err)
+	}
+	s.T().Logf("get vm config: %v", *config)
 }
