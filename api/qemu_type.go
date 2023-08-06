@@ -116,17 +116,10 @@ type VirtIO struct {
 	VirtIO0 string `json:"virtio0,omitempty"`
 }
 
-type Bool int8
-
-const (
-	True  Bool = 1
-	False Bool = 0
-)
-
 // reference : https://pve.proxmox.com/pve-docs/api-viewer/#/nodes/{node}/qemu
 type VirtualMachineCreateOptions struct {
 	// Enable/disable ACPI.
-	ACPI Bool `json:"acpi,omitempty"`
+	ACPI int8 `json:"acpi,omitempty"`
 	// List of host cores used to execute guest processes, for example: 0,5,8-11
 	Affinity string `json:"affinity,omitempty"`
 	// Enable/disable communication with the QEMU Guest Agent and its properties.
@@ -143,7 +136,7 @@ type VirtualMachineCreateOptions struct {
 	// Configure a audio device, useful in combination with QXL/Spice.
 	Audio0 string `json:"audio0,omitempty"`
 	// Automatic restart after crash (currently ignored).
-	AutoStart Bool `json:"autostart,omitempty"`
+	AutoStart int8 `json:"autostart,omitempty"`
 	// Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.
 	Balloon int `json:"balloon,omitempty"`
 	// Select BIOS implementation.
@@ -164,7 +157,7 @@ type VirtualMachineCreateOptions struct {
 	// We use the `nocloud` format for Linux, and `configdrive2` for windows.
 	CiType string `json:"citype,omitempty"`
 	// cloud-init: do an automatic package upgrade after the first boot.
-	CiUpgrate Bool `json:"ciupgrade,omitempty"`
+	CiUpgrate int8 `json:"ciupgrade,omitempty"`
 	// cloud-init: User name to change ssh keys and password for instead of the image's configured default user.
 	CiUser string `json:"ciuser,omitempty"`
 	// The number of cores per socket. : 1 ~
@@ -185,11 +178,11 @@ type VirtualMachineCreateOptions struct {
 	// to allocate a new volume. Note that SIZE_IN_GiB is ignored here and that the default
 	// EFI vars are copied to the volume instead. Use STORAGE_ID:0 and the 'import-from'
 	// parameter to import from an existing volume.
-	EfiDisk0 Bool `json:"efidisk0,omitempty"`
+	EfiDisk0 int8 `json:"efidisk0,omitempty"`
 	// Allow to overwrite existing VM.
-	Force Bool `json:"force,omitempty"`
+	Force int8 `json:"force,omitempty"`
 	// Freeze CPU at startup (use 'c' monitor command to start execution).
-	Freeze Bool `json:"freeze,omitempty"`
+	Freeze int8 `json:"freeze,omitempty"`
 	// Script that will be executed during various steps in the vms lifetime.
 	HookScript string `json:"hookscript,omitempty"`
 	// HostPci
@@ -206,12 +199,12 @@ type VirtualMachineCreateOptions struct {
 	IPConfig
 	// Inter-VM shared memory. Useful for direct communication between VMs, or to the host.
 	IVshMem       string `json:"ivshmem,omitempty"`
-	KeepHugePages Bool   `json:"keephugepages,omitempty"`
+	KeepHugePages int8   `json:"keephugepages,omitempty"`
 	Keyboard      string `json:"keyboard,omitempty"`
 	// enable/disable KVM hardware virtualization
-	KVM         Bool   `json:"kvm,omitempty"`
-	LiveRestore Bool   `json:"live-restore,omitempty"`
-	LocalTime   Bool   `json:"localtime,omitempty"`
+	KVM         int8   `json:"kvm,omitempty"`
+	LiveRestore int8   `json:"live-restore,omitempty"`
+	LocalTime   int8   `json:"localtime,omitempty"`
 	Lock        string `json:"lock,omitempty"`
 	// specifies the QEMU machine type
 	Machine string `json:"machine,omitempty"`
@@ -227,12 +220,12 @@ type VirtualMachineCreateOptions struct {
 	Net
 	Numa int8 `json:"numa,omitempty"`
 	// specifies whether a VM will be started during system bootup
-	OnBoot Bool `json:"onboot,omitempty"`
+	OnBoot int8 `json:"onboot,omitempty"`
 	// quest OS
 	OSType OSType `json:"ostype,omitempty"`
 	Parallel
 	Pool       string `json:"pool,omitempty"`
-	Protection Bool   `json:"protection,omitempty"`
+	Protection int8   `json:"protection,omitempty"`
 	// Allow reboot. if set to '0' the VM exit on reboot
 	Reboot int    `json:"reboot,omitempty"`
 	RNG0   string `json:"rng0,omitempty"`
@@ -255,14 +248,14 @@ type VirtualMachineCreateOptions struct {
 	// cloud-init setup public ssh keys (one key per line, OpenSSH format)
 	SSHKeys   string `json:"sshkeys,omitempty"`
 	StartDate string `json:"startdate,omitempty"`
-	StartUp   Bool   `json:"startup,omitempty"`
+	StartUp   int8   `json:"startup,omitempty"`
 	Storage   string `json:"storage,omitempty"`
-	Tablet    Bool   `json:"tablet,omitempty"`
+	Tablet    int8   `json:"tablet,omitempty"`
 	// tags of the VM. only for meta information
 	Tags string `json:"tags,omitempty"`
-	TDF  Bool   `json:"tdf,omitempty"`
+	TDF  int8   `json:"tdf,omitempty"`
 	// enable/disable template
-	Template  Bool   `json:"template,omitempty"`
+	Template  int8   `json:"template,omitempty"`
 	TPMState0 string `json:"tpmstate,omitempty"`
 	UnUsed
 	USB
@@ -277,7 +270,7 @@ type VirtualMachineCreateOptions struct {
 
 type VirtualMachineConfig struct {
 	// Enable/disable ACPI.
-	ACPI Bool `json:"acpi,omitempty"`
+	ACPI int8 `json:"acpi,omitempty"`
 	// List of host cores used to execute guest processes, for example: 0,5,8-11
 	Affinity string `json:"affinity,omitempty"`
 	// Enable/disable communication with the QEMU Guest Agent and its properties.
@@ -291,7 +284,7 @@ type VirtualMachineConfig struct {
 	// Configure a audio device, useful in combination with QXL/Spice.
 	Audio0 string `json:"audio0,omitempty"`
 	// Automatic restart after crash (currently ignored).
-	AutoStart Bool `json:"autostart,omitempty"`
+	AutoStart int8 `json:"autostart,omitempty"`
 	// Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.
 	Balloon int `json:"balloon,omitempty"`
 	// Select BIOS implementation.
@@ -323,8 +316,8 @@ type VirtualMachineConfig struct {
 	// Number is relative to weights of all the other running VMs.
 	CpuUnits    int    `json:"cpuunits,omitempty"`
 	Description string `json:"description,omitempty"`
-	EfiDisk0    Bool   `json:"efidisk0,omitempty"`
-	Freeze      Bool   `json:"freeze,omitempty"`
+	EfiDisk0    int8   `json:"efidisk0,omitempty"`
+	Freeze      int8   `json:"freeze,omitempty"`
 	HookScript  string `json:"hookscript,omitempty"`
 	// HostPci
 	HotPlug   string `json:"hotplug,omitempty"`
@@ -335,11 +328,11 @@ type VirtualMachineConfig struct {
 	Ide           `json:"-"`
 	IPConfig      `json:"-"`
 	IvshMem       string `json:"ivshmem,omitempty"`
-	KeepHugePages Bool   `json:"keephugepages,omitempty"`
+	KeepHugePages int8   `json:"keephugepages,omitempty"`
 	Keyboard      string `json:"keyboard,omitempty"`
 	// enable/disable KVM hardware virtualization
-	Kvm       Bool   `json:"kvm,omitempty"`
-	LocalTime Bool   `json:"localtime,omitempty"`
+	Kvm       int8   `json:"kvm,omitempty"`
+	LocalTime int8   `json:"localtime,omitempty"`
 	Lock      string `json:"lock,omitempty"`
 	// specifies the QEMU machine type
 	Machine string `json:"machine,omitempty"`
@@ -355,11 +348,11 @@ type VirtualMachineConfig struct {
 	Net  `json:"-"`
 	Numa int8 `json:"numa,omitempty"`
 	// specifies whether a VM will be started during system bootup
-	OnBoot Bool `json:"onboot,omitempty"`
+	OnBoot int8 `json:"onboot,omitempty"`
 	// quest OS
 	OSType     OSType `json:"ostype,omitempty"`
 	Parallel   `json:"-"`
-	Protection Bool `json:"protection,omitempty"`
+	Protection int8 `json:"protection,omitempty"`
 	// Allow reboot. if set to '0' the VM exit on reboot
 	Reboot int    `json:"reboot,omitempty"`
 	RNG0   string `json:"rng0,omitempty"`
@@ -382,13 +375,13 @@ type VirtualMachineConfig struct {
 	// cloud-init setup public ssh keys (one key per line, OpenSSH format)
 	SSHKeys   string `json:"sshkeys,omitempty"`
 	StartDate string `json:"startdate,omitempty"`
-	StartUp   Bool   `json:"startup,omitempty"`
-	Tablet    Bool   `json:"tablet,omitempty"`
+	StartUp   int8   `json:"startup,omitempty"`
+	Tablet    int8   `json:"tablet,omitempty"`
 	// tags of the VM. only for meta information
 	Tags string `json:"tags,omitempty"`
-	TDF  Bool   `json:"tdf,omitempty"`
+	TDF  int8   `json:"tdf,omitempty"`
 	// enable/disable template
-	Template       Bool   `json:"template,omitempty"`
+	Template       int8   `json:"template,omitempty"`
 	TPMState0      string `json:"tpmstate,omitempty"`
 	UnUsed         `json:"-"`
 	VCPUs          int    `json:"vcpus,omitempty"`
@@ -404,8 +397,8 @@ type VirtualMachineRebootOption struct {
 }
 
 type VirtualMachineResumeOption struct {
-	NoCheck  Bool `json:"nocheck,omitempty"`
-	SkipLock Bool `json:"skiplock,omitempty"`
+	NoCheck  int8 `json:"nocheck,omitempty"`
+	SkipLock int8 `json:"skiplock,omitempty"`
 }
 
 type VirtualMachineStartOption struct {
@@ -420,7 +413,7 @@ type VirtualMachineStartOption struct {
 	// migration traffic is ecrypted using an SSH tunnel by default.
 	// On secure, completely private networks this can be disabled to increase performance.
 	MigrationType string `json:"migration_type,omitempty"`
-	SkipLock      Bool   `json:"skiplock,omitempty"`
+	SkipLock      int8   `json:"skiplock,omitempty"`
 	// some command save/restore state from this location
 	StateURI string `json:"stateuri,omitempty"`
 	// Mapping from source to target storages. Providing only a single storage ID maps all source storages to that storage.
@@ -430,8 +423,8 @@ type VirtualMachineStartOption struct {
 }
 
 type VirtualMachineStopOption struct {
-	KeepActive   Bool   `json:"keepActive,omitempty"`
+	KeepActive   int8   `json:"keepActive,omitempty"`
 	MigratedFrom string `json:"migratedfrom,omitempty"`
-	SkipLock     Bool   `json:"skiplock,omitempty"`
+	SkipLock     int8   `json:"skiplock,omitempty"`
 	TimeOut      int    `json:"timeout,omitempty"`
 }
