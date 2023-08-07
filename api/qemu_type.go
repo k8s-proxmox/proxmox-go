@@ -138,13 +138,13 @@ type VirtualMachineCreateOptions struct {
 	// Automatic restart after crash (currently ignored).
 	AutoStart int8 `json:"autostart,omitempty"`
 	// Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.
-	Balloon *int `json:"balloon,omitempty"`
+	Balloon int `json:"balloon,omitempty"`
 	// Select BIOS implementation.
 	BIOS string `json:"bios,omitempty"`
 	// boot order. ";" separated. : 'order=device1;device2;device3'
 	Boot string `json:"boot,omitempty"`
 	// Override I/O bandwidth limit (in KiB/s).
-	BWLimit *int `json:"bwlimit,omitempty"`
+	BWLimit int `json:"bwlimit,omitempty"`
 	// This is an alias for option -ide2
 	CDRom string `json:"cdrom,omitempty"`
 	// cloud-init: Specify custom files to replace the automatically generated ones at start.
@@ -161,16 +161,16 @@ type VirtualMachineCreateOptions struct {
 	// cloud-init: User name to change ssh keys and password for instead of the image's configured default user.
 	CiUser string `json:"ciuser,omitempty"`
 	// The number of cores per socket. : 1 ~
-	Cores *int `json:"cores,omitempty"`
+	Cores int `json:"cores,omitempty"`
 	// emulated cpu type
 	Cpu string `json:"cpu,omitempty"`
 	// Limit of CPU usage.
 	// NOTE: If the computer has 2 CPUs, it has total of '2' CPU time. Value '0' indicates no CPU limit.
-	CpuLimit *int `json:"cpulimit,omitempty"`
+	CpuLimit int `json:"cpulimit,omitempty"`
 	// CPU weight for a VM. Argument is used in the kernel fair scheduler.
 	// The larger the number is, the more CPU time this VM gets.
 	// Number is relative to weights of all the other running VMs.
-	CpuUnits *int `json:"cpuunits,omitempty"`
+	CpuUnits int `json:"cpuunits,omitempty"`
 	// Description for the VM. Shown in the web-interface VM's summary.
 	// This is saved as comment inside the configuration file.
 	Description string `json:"description,omitempty"`
@@ -209,9 +209,9 @@ type VirtualMachineCreateOptions struct {
 	// specifies the QEMU machine type
 	Machine string `json:"machine,omitempty"`
 	// amount of RAM for the VM in MiB : 16 ~
-	Memory          *int        `json:"memory,omitempty"`
+	Memory          int         `json:"memory,omitempty"`
 	MigrateDowntime json.Number `json:"migrate_downtime,omitempty"`
-	MigrateSpeed    *int        `json:"migrate_speed,omitempty"`
+	MigrateSpeed    int         `json:"migrate_speed,omitempty"`
 	// name for VM. Only used on the configuration web interface
 	Name string `json:"name,omitempty"`
 	// cloud-init: Sets DNS server IP address for a container. Create will automatically use the setting from the host if neither searchdomain nor nameserver are set.
@@ -239,11 +239,11 @@ type VirtualMachineCreateOptions struct {
 	// cloud-init: Sets DNS search domains for a container. Create will automatically use the setting from the host if neither searchdomain nor nameserver are set.
 	SearchDomain string `json:"searchdomain,omitempty"`
 	Serial       `json:"-"`
-	Shares       *int   `json:"shares,omitempty"`
+	Shares       int    `json:"shares,omitempty"`
 	SMBios1      string `json:"smbios1,omitempty"`
-	SMP          *int   `json:"smp,omitempty"`
+	SMP          int    `json:"smp,omitempty"`
 	// number of sockets
-	Sockets           *int   `json:"sockets,omitempty"`
+	Sockets           int    `json:"sockets,omitempty"`
 	SpiceEnhancements string `json:"spice_enhancements,omitempty"`
 	// cloud-init setup public ssh keys (one key per line, OpenSSH format)
 	SSHKeys   string `json:"sshkeys,omitempty"`
@@ -259,11 +259,11 @@ type VirtualMachineCreateOptions struct {
 	TPMState0 string `json:"tpmstate,omitempty"`
 	UnUsed
 	USB
-	VCPUs *int   `json:"vcpus,omitempty"`
+	VCPUs int    `json:"vcpus,omitempty"`
 	VGA   string `json:"vga,omitempty"`
 	VirtIO
 	VMGenID        string `json:"vmgenid,omitempty"`
-	VMID           int    `json:"vmid"`
+	VMID           int    `json:"vmid,omitempty"`
 	VMStateStorage string `json:"vmstatestorage,omitempty"`
 	WatchDog       string `json:"watchdog,omitempty"`
 }
@@ -286,7 +286,7 @@ type VirtualMachineConfig struct {
 	// Automatic restart after crash (currently ignored).
 	AutoStart int8 `json:"autostart,omitempty"`
 	// Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.
-	Balloon *int `json:"balloon,omitempty"`
+	Balloon int `json:"balloon,omitempty"`
 	// Select BIOS implementation.
 	BIOS string `json:"bios,omitempty"`
 	// boot order. ";" separated. : 'order=device1;device2;device3'
@@ -305,16 +305,16 @@ type VirtualMachineConfig struct {
 	// cloud-init: User name to change ssh keys and password for instead of the image's configured default user.
 	CiUser string `json:"ciuser,omitempty"`
 	// The number of cores per socket. : 1 ~
-	Cores *int `json:"cores,omitempty"`
+	Cores int `json:"cores,omitempty"`
 	// emulated cpu type
 	Cpu string `json:"cpu,omitempty"`
 	// Limit of CPU usage.
 	// NOTE: If the computer has 2 CPUs, it has total of '2' CPU time. Value '0' indicates no CPU limit.
-	CpuLimit *int `json:"cpulimit,omitempty"`
+	CpuLimit int `json:"cpulimit,omitempty"`
 	// CPU weight for a VM. Argument is used in the kernel fair scheduler.
 	// The larger the number is, the more CPU time this VM gets.
 	// Number is relative to weights of all the other running VMs.
-	CpuUnits    *int   `json:"cpuunits,omitempty"`
+	CpuUnits    int    `json:"cpuunits,omitempty"`
 	Description string `json:"description,omitempty"`
 	EfiDisk0    int8   `json:"efidisk0,omitempty"`
 	Freeze      int8   `json:"freeze,omitempty"`
@@ -337,9 +337,9 @@ type VirtualMachineConfig struct {
 	// specifies the QEMU machine type
 	Machine string `json:"machine,omitempty"`
 	// amount of RAM for the VM in MiB : 16 ~
-	Memory          *int        `json:"memory,omitempty"`
+	Memory          int         `json:"memory,omitempty"`
 	MigrateDowntime json.Number `json:"migrate_downtime,omitempty"`
-	MigrateSpeed    *int        `json:"migrate_speed,omitempty"`
+	MigrateSpeed    int         `json:"migrate_speed,omitempty"`
 	// name for VM. Only used on the configuration web interface
 	Name string `json:"name,omitempty"`
 	// cloud-init: Sets DNS server IP address for a container. Create will automatically use the setting from the host if neither searchdomain nor nameserver are set.
@@ -354,7 +354,7 @@ type VirtualMachineConfig struct {
 	Parallel   `json:"-"`
 	Protection int8 `json:"protection,omitempty"`
 	// Allow reboot. if set to '0' the VM exit on reboot
-	Reboot *int8  `json:"reboot,omitempty"`
+	Reboot int    `json:"reboot,omitempty"`
 	RNG0   string `json:"rng0,omitempty"`
 	Sata   `json:"-"`
 	// use volume as scsi hard disk or cd-rom
@@ -366,11 +366,11 @@ type VirtualMachineConfig struct {
 	// cloud-init: Sets DNS search domains for a container. Create will automatically use the setting from the host if neither searchdomain nor nameserver are set.
 	SearchDomain string `json:"searchdomain,omitempty"`
 	Serial       `json:"-"`
-	Shares       *int   `json:"shares,omitempty"`
+	Shares       int    `json:"shares,omitempty"`
 	SMBios1      string `json:"smbios1,omitempty"`
-	SMP          *int   `json:"smp,omitempty"`
+	SMP          int    `json:"smp,omitempty"`
 	// number of sockets
-	Sockets           *int   `json:"sockets,omitempty"`
+	Sockets           int    `json:"sockets,omitempty"`
 	SpiceEnhancements string `json:"spice_enhancements,omitempty"`
 	// cloud-init setup public ssh keys (one key per line, OpenSSH format)
 	SSHKeys   string `json:"sshkeys,omitempty"`
@@ -384,7 +384,7 @@ type VirtualMachineConfig struct {
 	Template       int8   `json:"template,omitempty"`
 	TPMState0      string `json:"tpmstate,omitempty"`
 	UnUsed         `json:"-"`
-	VCPUs          *int   `json:"vcpus,omitempty"`
+	VCPUs          int    `json:"vcpus,omitempty"`
 	VGA            string `json:"vga,omitempty"`
 	VirtIO         `json:"-"`
 	VMGenID        string `json:"vmgenid,omitempty"`
