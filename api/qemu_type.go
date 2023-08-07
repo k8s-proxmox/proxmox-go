@@ -238,10 +238,10 @@ type VirtualMachineCreateOptions struct {
 	ScsiHw ScsiHw `json:"scsihw,omitempty"`
 	// cloud-init: Sets DNS search domains for a container. Create will automatically use the setting from the host if neither searchdomain nor nameserver are set.
 	SearchDomain string `json:"searchdomain,omitempty"`
-	Serial       `json:"-"`
-	Shares       int    `json:"shares,omitempty"`
-	SMBios1      string `json:"smbios1,omitempty"`
-	SMP          int    `json:"smp,omitempty"`
+	Serial
+	Shares  int    `json:"shares,omitempty"`
+	SMBios1 string `json:"smbios1,omitempty"`
+	SMP     int    `json:"smp,omitempty"`
 	// number of sockets
 	Sockets           int    `json:"sockets,omitempty"`
 	SpiceEnhancements string `json:"spice_enhancements,omitempty"`
