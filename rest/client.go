@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -121,10 +120,14 @@ func (c *RESTClient) Do(ctx context.Context, httpMethod, urlPath string, req, v 
 	defer httpRsp.Body.Close()
 
 	if err := checkResponse(httpRsp); err != nil {
+		if IsNotAuthorized(err) {
+			// try to remove expired ticket
+			c.session = nil
+		}
 		return err
 	}
 
-	buf, err := ioutil.ReadAll(httpRsp.Body)
+	buf, err := io.ReadAll(httpRsp.Body)
 	if err != nil {
 		return err
 	}
