@@ -77,16 +77,16 @@ func (s *Service) VirtualMachineFromUUID(ctx context.Context, uuid string) (*Vir
 	for _, node := range nodes {
 		vms, err := s.restclient.GetVirtualMachines(ctx, node.Node)
 		if err != nil {
-			return nil, err
+			continue
 		}
 		for _, vm := range vms {
 			config, err := s.restclient.GetVirtualMachineConfig(ctx, node.Node, vm.VMID)
 			if err != nil {
-				return nil, err
+				continue
 			}
 			vmuuid, err := ConvertSMBiosToUUID(config.SMBios1)
 			if err != nil {
-				return nil, err
+				continue
 			}
 			if vmuuid == uuid {
 				return &VirtualMachine{service: s, restclient: s.restclient, VM: vm, Node: node.Node, config: config}, nil
