@@ -69,6 +69,8 @@ func (s *Service) CreateVirtualMachine(ctx context.Context, node string, vmid in
 	return s.VirtualMachine(ctx, vmid)
 }
 
+// VirtualMachineFromUUID attempts to find virtual machine based on SMBIOS UUID. It will ignore any error that prevents
+// it from inspecting additional virtual machines (e.g. offline node, vm config not accessible, malformed uuids)
 func (s *Service) VirtualMachineFromUUID(ctx context.Context, uuid string) (*VirtualMachine, error) {
 	nodes, err := s.Nodes(ctx)
 	if err != nil {
@@ -77,16 +79,16 @@ func (s *Service) VirtualMachineFromUUID(ctx context.Context, uuid string) (*Vir
 	for _, node := range nodes {
 		vms, err := s.restclient.GetVirtualMachines(ctx, node.Node)
 		if err != nil {
-			return nil, err
+			continue
 		}
 		for _, vm := range vms {
 			config, err := s.restclient.GetVirtualMachineConfig(ctx, node.Node, vm.VMID)
 			if err != nil {
-				return nil, err
+				continue
 			}
 			vmuuid, err := ConvertSMBiosToUUID(config.SMBios1)
 			if err != nil {
-				return nil, err
+				continue
 			}
 			if vmuuid == uuid {
 				return &VirtualMachine{service: s, restclient: s.restclient, VM: vm, Node: node.Node, config: config}, nil
