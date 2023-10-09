@@ -11,7 +11,7 @@ type Node struct {
 	Mem            int     `json:"mem"`
 	Node           string  `json:"node"`
 	SSLFingerprint string  `json:"ssl_fingerprint"`
-	Stauts         string  `json:"status"`
+	Status         string  `json:"status"`
 	Type           string  `json:"type"`
 	UpTime         int     `json:"uptime"`
 }
