@@ -55,3 +55,7 @@ func (c *RESTClient) GetNodeVNCWebSocket(ctx context.Context, nodeName, port, vn
 	}
 	return websocket, nil
 }
+
+func (c *RESTClient) Credentials() *TicketRequest {
+	return c.credentials
+}

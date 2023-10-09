@@ -1,9 +1,12 @@
 package proxmox
 
 import (
+	"bufio"
 	"context"
 	"encoding/base64"
 	"fmt"
+	"io"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -45,7 +48,18 @@ func (s *Service) NewNodeVNCWebSocketConnection(ctx context.Context, nodeName st
 		}
 	}()
 
-	return &VNCWebSocketClient{conn: conn, ticker: ticker}, nil
+	client := &VNCWebSocketClient{conn: conn, ticker: ticker}
+
+	credentials := s.restclient.Credentials()
+	// login is required for non-root user: https://git.proxmox.com/?p=pve-manager.git;a=blob;f=PVE/API2/Nodes.pm;h=0843c3a3c6cee7c763bf4ac9d8b75ab298f1373e;hb=HEAD#l913
+	if credentials.Username != "root@pam" {
+		err := client.Login(strings.Replace(credentials.Username, "@pam", "", 1), credentials.Password)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return client, nil
 }
 
 func (c *VNCWebSocketClient) Close() {
@@ -61,6 +75,121 @@ func (c *VNCWebSocketClient) Write(cmd string) error {
 		return err
 	}
 	return c.sendFinMessage()
+}
+
+func (c *VNCWebSocketClient) ExpectMessage(expected string) error {
+	_, msg, err := c.conn.ReadMessage()
+	if err != nil {
+		return fmt.Errorf("failed to read message: %v", err)
+	}
+
+	if !strings.Contains(string(msg), expected) {
+		return fmt.Errorf("read expected '%s' did not contain expected '%s'", string(msg), expected)
+	}
+	return nil
+}
+
+func (c *VNCWebSocketClient) ExpectMessageMultiline(expected string) error {
+	dataStream := make(chan string, 1)
+	readErr := make(chan error)
+	stop := make(chan bool)
+	go func() {
+	loop:
+		for {
+			select {
+			case <-stop:
+				break loop
+			default:
+				var r io.Reader
+				_, r, err := c.conn.NextReader()
+				if err != nil {
+					readErr <- err
+					break loop
+				}
+
+				br := bufio.NewReader(r)
+				s, e := ReadLine(br)
+				for e == nil {
+					dataStream <- s
+					s, e = ReadLine(br)
+				}
+				if e == io.EOF {
+					continue loop
+				} else {
+					readErr <- e
+				}
+				break loop
+
+			}
+		}
+		close(dataStream)
+		close(readErr)
+	}()
+
+	for {
+		select {
+		case data := <-dataStream:
+			if strings.Contains(data, expected) {
+				stop <- true
+				return nil
+			}
+		case <-time.After(time.Duration(10) * time.Second):
+			return fmt.Errorf("timeout while reading multiline response")
+		case err := <-readErr:
+			if err != nil {
+				log.Fatal(err)
+			}
+			return err
+		}
+	}
+}
+
+func ReadLine(r *bufio.Reader) (string, error) {
+	var (
+		isPrefix bool  = true
+		err      error = nil
+		line, ln []byte
+	)
+	for isPrefix && err == nil {
+		line, isPrefix, err = r.ReadLine()
+		ln = append(ln, line...)
+	}
+	return string(ln), err
+}
+
+func (c *VNCWebSocketClient) WriteMessage(message string) error {
+	b := []byte(message)
+	bheader := []byte(fmt.Sprintf("0:%d:", len(b)))
+	bmsg := append(bheader, b...)
+	if err := c.conn.WriteMessage(websocket.BinaryMessage, bmsg); err != nil {
+		return fmt.Errorf("failed writing message '%s': %v", message, err)
+	}
+	return nil
+}
+
+func (c *VNCWebSocketClient) Login(username string, password string) error {
+	if err := c.ExpectMessage("OK"); err != nil {
+		return err
+	}
+	if err := c.ExpectMessage("login"); err != nil {
+		return err
+	}
+	if err := c.WriteMessage(fmt.Sprintf("%s\n", username)); err != nil {
+		return err
+	}
+	if err := c.ExpectMessage(username); err != nil {
+		return err
+	}
+	if err := c.ExpectMessage("Password"); err != nil {
+		return err
+	}
+	if err := c.WriteMessage(fmt.Sprintf("%s\n", password)); err != nil {
+		return err
+	}
+	if err := c.ExpectMessageMultiline("Last login"); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *VNCWebSocketClient) WriteFile(ctx context.Context, content, path string) error {
