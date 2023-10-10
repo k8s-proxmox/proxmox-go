@@ -70,14 +70,77 @@ type Ide struct {
 	Ide0 string `json:"ide0,omitempty"`
 	Ide1 string `json:"ide1,omitempty"`
 	Ide2 string `json:"ide2,omitempty"`
+	Ide3 string `json:"ide3,omitempty"`
 }
 
 type IPConfig struct {
-	IPConfig0 string `json:"ipconfig0,omitempty"`
+	IPConfig0  string `json:"ipconfig0,omitempty"`
+	IPConfig1  string `json:"ipconfig1,omitempty"`
+	IPConfig2  string `json:"ipconfig2,omitempty"`
+	IPConfig3  string `json:"ipconfig3,omitempty"`
+	IPConfig4  string `json:"ipconfig4,omitempty"`
+	IPConfig5  string `json:"ipconfig5,omitempty"`
+	IPConfig6  string `json:"ipconfig6,omitempty"`
+	IPConfig7  string `json:"ipconfig7,omitempty"`
+	IPConfig8  string `json:"ipconfig8,omitempty"`
+	IPConfig9  string `json:"ipconfig9,omitempty"`
+	IPConfig10 string `json:"ipconfig10,omitempty"`
+	IPConfig11 string `json:"ipconfig11,omitempty"`
+	IPConfig12 string `json:"ipconfig12,omitempty"`
+	IPConfig13 string `json:"ipconfig13,omitempty"`
+	IPConfig14 string `json:"ipconfig14,omitempty"`
+	IPConfig15 string `json:"ipconfig15,omitempty"`
+	IPConfig16 string `json:"ipconfig16,omitempty"`
+	IPConfig17 string `json:"ipconfig17,omitempty"`
+	IPConfig18 string `json:"ipconfig18,omitempty"`
+	IPConfig19 string `json:"ipconfig19,omitempty"`
+	IPConfig20 string `json:"ipconfig20,omitempty"`
+	IPConfig21 string `json:"ipconfig21,omitempty"`
+	IPConfig22 string `json:"ipconfig22,omitempty"`
+	IPConfig23 string `json:"ipconfig23,omitempty"`
+	IPConfig24 string `json:"ipconfig24,omitempty"`
+	IPConfig25 string `json:"ipconfig25,omitempty"`
+	IPConfig26 string `json:"ipconfig26,omitempty"`
+	IPConfig27 string `json:"ipconfig27,omitempty"`
+	IPConfig28 string `json:"ipconfig28,omitempty"`
+	IPConfig29 string `json:"ipconfig29,omitempty"`
+	IPConfig30 string `json:"ipconfig30,omitempty"`
+	IPConfig31 string `json:"ipconfig31,omitempty"`
 }
 
 type Net struct {
-	Net0 string `json:"net0,omitempty"`
+	Net0  string `json:"net0,omitempty"`
+	Net1  string `json:"net1,omitempty"`
+	Net2  string `json:"net2,omitempty"`
+	Net3  string `json:"net3,omitempty"`
+	Net4  string `json:"net4,omitempty"`
+	Net5  string `json:"net5,omitempty"`
+	Net6  string `json:"net6,omitempty"`
+	Net7  string `json:"net7,omitempty"`
+	Net8  string `json:"net8,omitempty"`
+	Net9  string `json:"net9,omitempty"`
+	Net10 string `json:"net10,omitempty"`
+	Net11 string `json:"net11,omitempty"`
+	Net12 string `json:"net12,omitempty"`
+	Net13 string `json:"net13,omitempty"`
+	Net14 string `json:"net14,omitempty"`
+	Net15 string `json:"net15,omitempty"`
+	Net16 string `json:"net16,omitempty"`
+	Net17 string `json:"net17,omitempty"`
+	Net18 string `json:"net18,omitempty"`
+	Net19 string `json:"net19,omitempty"`
+	Net20 string `json:"net20,omitempty"`
+	Net21 string `json:"net21,omitempty"`
+	Net22 string `json:"net22,omitempty"`
+	Net23 string `json:"net23,omitempty"`
+	Net24 string `json:"net24,omitempty"`
+	Net25 string `json:"net25,omitempty"`
+	Net26 string `json:"net26,omitempty"`
+	Net27 string `json:"net27,omitempty"`
+	Net28 string `json:"net28,omitempty"`
+	Net29 string `json:"net29,omitempty"`
+	Net30 string `json:"net30,omitempty"`
+	Net31 string `json:"net31,omitempty"`
 }
 
 type Parallel struct {
@@ -95,25 +158,111 @@ type Sata struct {
 	Sata5 string `json:"sata5,omitempty"`
 }
 
-// wip n = 0~30
 type Scsi struct {
-	Scsi0 string `json:"scsi0,omitempty"`
+	Scsi0  string `json:"scsi0,omitempty"`
+	Scsi1  string `json:"scsi1,omitempty"`
+	Scsi2  string `json:"scsi2,omitempty"`
+	Scsi3  string `json:"scsi3,omitempty"`
+	Scsi4  string `json:"scsi4,omitempty"`
+	Scsi5  string `json:"scsi5,omitempty"`
+	Scsi6  string `json:"scsi6,omitempty"`
+	Scsi7  string `json:"scsi7,omitempty"`
+	Scsi8  string `json:"scsi8,omitempty"`
+	Scsi9  string `json:"scsi9,omitempty"`
+	Scsi10 string `json:"scsi10,omitempty"`
+	Scsi11 string `json:"scsi11,omitempty"`
+	Scsi12 string `json:"scsi12,omitempty"`
+	Scsi13 string `json:"scsi13,omitempty"`
+	Scsi14 string `json:"scsi14,omitempty"`
+	Scsi15 string `json:"scsi15,omitempty"`
+	Scsi16 string `json:"scsi16,omitempty"`
+	Scsi17 string `json:"scsi17,omitempty"`
+	Scsi18 string `json:"scsi18,omitempty"`
+	Scsi19 string `json:"scsi19,omitempty"`
+	Scsi20 string `json:"scsi20,omitempty"`
+	Scsi21 string `json:"scsi21,omitempty"`
+	Scsi22 string `json:"scsi22,omitempty"`
+	Scsi23 string `json:"scsi23,omitempty"`
+	Scsi24 string `json:"scsi24,omitempty"`
+	Scsi25 string `json:"scsi25,omitempty"`
+	Scsi26 string `json:"scsi26,omitempty"`
+	Scsi27 string `json:"scsi27,omitempty"`
+	Scsi28 string `json:"scsi28,omitempty"`
+	Scsi29 string `json:"scsi29,omitempty"`
+	Scsi30 string `json:"scsi30,omitempty"`
 }
 
 type Serial struct {
 	Serial0 string `json:"serial0,omitempty"`
+	Serial1 string `json:"serial1,omitempty"`
+	Serial2 string `json:"serial2,omitempty"`
+	Serial3 string `json:"serial3,omitempty"`
 }
 
 type UnUsed struct {
 	UnUsed0 string `json:"unused0,omitempty"`
+	UnUsed1 string `json:"unused1,omitempty"`
+	UnUsed2 string `json:"unused2,omitempty"`
+	UnUsed3 string `json:"unused3,omitempty"`
+	UnUsed4 string `json:"unused4,omitempty"`
+	UnUsed5 string `json:"unused5,omitempty"`
+	UnUsed6 string `json:"unused6,omitempty"`
+	UnUsed7 string `json:"unused7,omitempty"`
 }
 
 type USB struct {
-	USB0 string `json:"usb0,omitempty"`
+	USB0  string `json:"usb0,omitempty"`
+	USB1  string `json:"usb1,omitempty"`
+	USB2  string `json:"usb2,omitempty"`
+	USB3  string `json:"usb3,omitempty"`
+	USB4  string `json:"usb4,omitempty"`
+	USB5  string `json:"usb5,omitempty"`
+	USB6  string `json:"usb6,omitempty"`
+	USB7  string `json:"usb7,omitempty"`
+	USB8  string `json:"usb8,omitempty"`
+	USB9  string `json:"usb9,omitempty"`
+	USB10 string `json:"usb10,omitempty"`
+	USB11 string `json:"usb11,omitempty"`
+	USB12 string `json:"usb12,omitempty"`
+	USB13 string `json:"usb13,omitempty"`
+	USB14 string `json:"usb14,omitempty"`
 }
 
 type VirtIO struct {
-	VirtIO0 string `json:"virtio0,omitempty"`
+	VirtIO0  string `json:"virtio0,omitempty"`
+	VirtIO1  string `json:"virtio1,omitempty"`
+	VirtIO2  string `json:"virtio2,omitempty"`
+	VirtIO3  string `json:"virtio3,omitempty"`
+	VirtIO4  string `json:"virtio4,omitempty"`
+	VirtIO5  string `json:"virtio5,omitempty"`
+	VirtIO6  string `json:"virtio6,omitempty"`
+	VirtIO7  string `json:"virtio7,omitempty"`
+	VirtIO8  string `json:"virtio8,omitempty"`
+	VirtIO9  string `json:"virtio9,omitempty"`
+	VirtIO10 string `json:"virtio10,omitempty"`
+	VirtIO11 string `json:"virtio11,omitempty"`
+	VirtIO12 string `json:"virtio12,omitempty"`
+	VirtIO13 string `json:"virtio13,omitempty"`
+	VirtIO14 string `json:"virtio14,omitempty"`
+	VirtIO15 string `json:"virtio15,omitempty"`
+}
+
+type HostPci struct {
+	HostPci0 string `json:"hostpci0,omitempty"`
+	HostPci1 string `json:"hostpci1,omitempty"`
+	HostPci2 string `json:"hostpci2,omitempty"`
+	HostPci3 string `json:"hostpci3,omitempty"`
+}
+
+type NumaS struct {
+	Numa0 string `json:"numa0,omitempty"`
+	Numa1 string `json:"numa1,omitempty"`
+	Numa2 string `json:"numa2,omitempty"`
+	Numa3 string `json:"numa3,omitempty"`
+	Numa4 string `json:"numa4,omitempty"`
+	Numa5 string `json:"numa5,omitempty"`
+	Numa6 string `json:"numa6,omitempty"`
+	Numa7 string `json:"numa7,omitempty"`
 }
 
 // reference : https://pve.proxmox.com/pve-docs/api-viewer/#/nodes/{node}/qemu
@@ -185,7 +334,7 @@ type VirtualMachineCreateOptions struct {
 	Freeze int8 `json:"freeze,omitempty"`
 	// Script that will be executed during various steps in the vms lifetime.
 	HookScript string `json:"hookscript,omitempty"`
-	// HostPci
+	HostPci
 	// Selectively enable hotplug features. This is a comma separated list of hotplug features: 'network', 'disk', 'cpu', 'memory', 'usb' and 'cloudinit'.
 	// Use '0' to disable hotplug completely. Using '1' as value is an alias for the default `network,disk,usb`.
 	// USB hotplugging is possible for guests with machine version >= 7.1 and ostype l26 or windows > 7.
@@ -219,6 +368,7 @@ type VirtualMachineCreateOptions struct {
 	// network device
 	Net
 	Numa int8 `json:"numa,omitempty"`
+	NumaS
 	// specifies whether a VM will be started during system bootup
 	OnBoot int8 `json:"onboot,omitempty"`
 	// quest OS
@@ -319,7 +469,7 @@ type VirtualMachineConfig struct {
 	EfiDisk0    int8   `json:"efidisk0,omitempty"`
 	Freeze      int8   `json:"freeze,omitempty"`
 	HookScript  string `json:"hookscript,omitempty"`
-	// HostPci
+	HostPci
 	HotPlug   string `json:"hotplug,omitempty"`
 	HugePages string `json:"hugepages,omitempty"`
 	// Use volume as IDE hard disk or CD-ROM (n is 0 to 3).
@@ -347,6 +497,7 @@ type VirtualMachineConfig struct {
 	// network device
 	Net  `json:"-"`
 	Numa int8 `json:"numa,omitempty"`
+	NumaS
 	// specifies whether a VM will be started during system bootup
 	OnBoot int8 `json:"onboot,omitempty"`
 	// quest OS
