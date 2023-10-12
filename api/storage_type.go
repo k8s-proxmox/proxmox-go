@@ -22,12 +22,12 @@ type Storage struct {
 type StorageCreateOptions struct {
 	Storage     string `json:"storage,omitempty"`
 	StorageType string `json:"type,omitempty"`
-	// allowed cotent types
+	// allowed content types
 	// NOTE: the value 'rootdir' is used for Containers, and value 'images' for VMs
 	Content     string `json:"content,omitempty"`
 	ContentDirs string `json:"content-dirs,omitempty"`
 	Format      string `json:"format,omitempty"`
-	Mkdir       bool   `json:"mkdir,omitempty"`
+	Mkdir       *bool  `json:"mkdir,omitempty"`
 	Path        string `json:"path,omitempty"`
 }
 
