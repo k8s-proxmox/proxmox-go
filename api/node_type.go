@@ -30,9 +30,9 @@ type TermProxyOption struct {
 
 type VNCShellOption struct {
 	TermProxyOption
-	Height    int  `json:"height,omitempty"`
-	Websocket bool `json:"websocket,omitempty"`
-	Width     int  `json:"width,omitempty"`
+	Height    int   `json:"height,omitempty"`
+	Websocket *bool `json:"websocket,omitempty"`
+	Width     int   `json:"width,omitempty"`
 }
 
 type VNCWebSocket struct {
