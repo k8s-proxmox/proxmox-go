@@ -52,9 +52,10 @@ func (s *TestSuite) TestCreateDeleteStorage() {
 	s.EnsureNoStorage(testStorageName)
 
 	// create
+	mkdir := true
 	testOptions := api.StorageCreateOptions{
 		Content: "images",
-		Mkdir:   true,
+		Mkdir:   &mkdir,
 		Path:    "/var/lib/vz/test",
 	}
 	storage, err := s.restclient.CreateStorage(context.TODO(), testStorageName, "dir", testOptions)
