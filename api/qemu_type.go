@@ -367,7 +367,9 @@ type VirtualMachineCreateOptions struct {
 	NameServer string `json:"nameserver,omitempty"`
 	// network device
 	Net
-	Numa int8 `json:"numa,omitempty"`
+	// node name
+	Node string `json:"-"`
+	Numa int8   `json:"numa,omitempty"`
 	NumaS
 	// specifies whether a VM will be started during system bootup
 	OnBoot int8 `json:"onboot,omitempty"`
@@ -469,14 +471,14 @@ type VirtualMachineConfig struct {
 	EfiDisk0    int8   `json:"efidisk0,omitempty"`
 	Freeze      int8   `json:"freeze,omitempty"`
 	HookScript  string `json:"hookscript,omitempty"`
-	HostPci     `json:"-"`
+	HostPci     `json:",inline"`
 	HotPlug     string `json:"hotplug,omitempty"`
 	HugePages   string `json:"hugepages,omitempty"`
 	// Use volume as IDE hard disk or CD-ROM (n is 0 to 3).
 	// Use the special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume.
 	// Use STORAGE_ID:0 and the 'import-from' parameter to import from an existing volume.
-	Ide           `json:"-"`
-	IPConfig      `json:"-"`
+	Ide           `json:",inline"`
+	IPConfig      `json:",inline"`
 	IvshMem       string `json:"ivshmem,omitempty"`
 	KeepHugePages int8   `json:"keephugepages,omitempty"`
 	Keyboard      string `json:"keyboard,omitempty"`
@@ -495,28 +497,28 @@ type VirtualMachineConfig struct {
 	// cloud-init: Sets DNS server IP address for a container. Create will automatically use the setting from the host if neither searchdomain nor nameserver are set.
 	NameServer string `json:"nameserver,omitempty"`
 	// network device
-	Net   `json:"-"`
+	Net   `json:",inline"`
 	Numa  int8 `json:"numa,omitempty"`
-	NumaS `json:"-"`
+	NumaS `json:",inline"`
 	// specifies whether a VM will be started during system bootup
 	OnBoot int8 `json:"onboot,omitempty"`
 	// quest OS
 	OSType     OSType `json:"ostype,omitempty"`
-	Parallel   `json:"-"`
+	Parallel   `json:",inline"`
 	Protection int8 `json:"protection,omitempty"`
 	// Allow reboot. if set to '0' the VM exit on reboot
 	Reboot int    `json:"reboot,omitempty"`
 	RNG0   string `json:"rng0,omitempty"`
-	Sata   `json:"-"`
+	Sata   `json:",inline"`
 	// use volume as scsi hard disk or cd-rom
 	// use special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume
 	// use STORAGE_ID:0 and the 'import-from' parameter to import from an existing volume.
-	Scsi `json:"-"`
+	Scsi `json:",inline"`
 	// SCSI controller model
 	ScsiHw ScsiHw `json:"scsihw,omitempty"`
 	// cloud-init: Sets DNS search domains for a container. Create will automatically use the setting from the host if neither searchdomain nor nameserver are set.
 	SearchDomain string `json:"searchdomain,omitempty"`
-	Serial       `json:"-"`
+	Serial       `json:",inline"`
 	Shares       int    `json:"shares,omitempty"`
 	SMBios1      string `json:"smbios1,omitempty"`
 	SMP          int    `json:"smp,omitempty"`
@@ -534,10 +536,10 @@ type VirtualMachineConfig struct {
 	// enable/disable template
 	Template       int8   `json:"template,omitempty"`
 	TPMState0      string `json:"tpmstate,omitempty"`
-	UnUsed         `json:"-"`
+	UnUsed         `json:",inline"`
 	VCPUs          int    `json:"vcpus,omitempty"`
 	VGA            string `json:"vga,omitempty"`
-	VirtIO         `json:"-"`
+	VirtIO         `json:",inline"`
 	VMGenID        string `json:"vmgenid,omitempty"`
 	VMStateStorage string `json:"vmstatestorage,omitempty"`
 	WatchDog       string `json:"watchdog,omitempty"`
