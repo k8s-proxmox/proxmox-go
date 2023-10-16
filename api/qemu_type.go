@@ -415,7 +415,7 @@ type VirtualMachineCreateOptions struct {
 	VGA   string `json:"vga,omitempty"`
 	VirtIO
 	VMGenID        string `json:"vmgenid,omitempty"`
-	VMID           int    `json:"vmid,omitempty"`
+	VMID           *int   `json:"vmid,omitempty"`
 	VMStateStorage string `json:"vmstatestorage,omitempty"`
 	WatchDog       string `json:"watchdog,omitempty"`
 }

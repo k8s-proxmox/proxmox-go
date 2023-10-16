@@ -30,7 +30,7 @@ func (c *RESTClient) GetVirtualMachine(ctx context.Context, node string, vmid in
 }
 
 func (c *RESTClient) CreateVirtualMachine(ctx context.Context, node string, vmid int, options api.VirtualMachineCreateOptions) (*string, error) {
-	options.VMID = vmid
+	options.VMID = &vmid
 	path := fmt.Sprintf("/nodes/%s/qemu", node)
 	var upid *string
 	if err := c.Post(ctx, path, options, &upid); err != nil {
