@@ -9,3 +9,11 @@ func (s *TestSuite) TestGetNextID() {
 	}
 	s.T().Logf("get nextID: %d", nextid)
 }
+
+func (s *TestSuite) TestGetJoinConfig() {
+	c, err := s.restclient.GetJoinConfig(context.Background())
+	if err != nil {
+		s.T().Errorf("failed to get join config: %v", err)
+	}
+	s.T().Logf("get join config: %v", c)
+}
