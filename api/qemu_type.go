@@ -400,7 +400,7 @@ type VirtualMachineCreateOptions struct {
 	// cloud-init setup public ssh keys (one key per line, OpenSSH format)
 	SSHKeys   string `json:"sshkeys,omitempty"`
 	StartDate string `json:"startdate,omitempty"`
-	StartUp   int8   `json:"startup,omitempty"`
+	StartUp   string `json:"startup,omitempty"`
 	Storage   string `json:"storage,omitempty"`
 	Tablet    int8   `json:"tablet,omitempty"`
 	// tags of the VM. only for meta information
