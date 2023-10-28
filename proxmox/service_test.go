@@ -3,16 +3,9 @@ package proxmox
 import (
 	"os"
 	"testing"
-
-	"github.com/stretchr/testify/suite"
 )
 
-type TestSuite struct {
-	suite.Suite
-	service Service
-}
-
-func (s *TestSuite) SetupSuite() {
+func TestGetOrCreateService(t *testing.T) {
 	url := os.Getenv("PROXMOX_URL")
 	user := os.Getenv("PROXMOX_USERNAME")
 	password := os.Getenv("PROXMOX_PASSWORD")
@@ -20,7 +13,7 @@ func (s *TestSuite) SetupSuite() {
 	secret := os.Getenv("PROXMOX_SECRET")
 	method := os.Getenv("PROXMOX_AUTH_METHOD")
 	if url == "" {
-		s.T().Fatal("url must not be empty")
+		t.Fatal("url must not be empty")
 	}
 
 	params := Params{
@@ -37,13 +30,15 @@ func (s *TestSuite) SetupSuite() {
 		},
 	}
 
-	service, err := NewService(params)
-	if err != nil {
-		s.T().Fatalf("failed to create new service: %v", err)
+	var svc *Service
+	for i := 0; i < 10; i++ {
+		s, err := GetOrCreateService(params)
+		if err != nil {
+			t.Fatalf("failed to get/create service: %v", err)
+		}
+		if i > 0 && s != svc {
+			t.Fatalf("should not create new service: %v(cached)!=%v(new)", svc, s)
+		}
+		svc = s
 	}
-	s.service = *service
-}
-
-func TestSuiteIntegration(t *testing.T) {
-	suite.Run(t, new(TestSuite))
 }

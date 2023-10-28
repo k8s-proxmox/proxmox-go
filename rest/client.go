@@ -10,14 +10,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/sp-yduck/proxmox-go/api"
+)
+
+const (
+	defaultUserAgent = "sp-yduck/proxmox-go"
 )
 
 type RESTClient struct {
 	endpoint    string
 	httpClient  *http.Client
+	tokenid     string
 	token       string
 	session     *api.Session
 	credentials *TicketRequest
@@ -90,6 +93,7 @@ func WithUserPassword(username, password string) ClientOption {
 
 func WithAPIToken(tokenid, secret string) ClientOption {
 	return func(c *RESTClient) {
+		c.tokenid = tokenid
 		c.token = fmt.Sprintf("%s=%s", tokenid, secret)
 	}
 }
@@ -165,9 +169,11 @@ func (c *RESTClient) makeAuthHeaders() http.Header {
 	header.Add("Accept", "application/json")
 	if c.token != "" {
 		header.Add("Authorization", fmt.Sprintf("PVEAPIToken=%s", c.token))
+		header.Add("User-Agent", fmt.Sprintf("%s:%s", defaultUserAgent, c.tokenid))
 	} else if c.session != nil {
 		header.Add("Cookie", fmt.Sprintf("PVEAuthCookie=%s", c.session.Ticket))
 		header.Add("CSRFPreventionToken", c.session.CSRFPreventionToken)
+		header.Add("User-Agent", fmt.Sprintf("%s:%s", defaultUserAgent, c.session.Username))
 	}
 	return header
 }
@@ -188,7 +194,7 @@ func checkResponse(res *http.Response) error {
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return errors.Errorf("failed to read body while handling http response of status %d : %v", res.StatusCode, err)
+		return fmt.Errorf("failed to read body while handling http response of status %d : %v", res.StatusCode, err)
 	}
 
 	if res.StatusCode == http.StatusInternalServerError || res.StatusCode == http.StatusNotImplemented {
@@ -204,10 +210,10 @@ func checkResponse(res *http.Response) error {
 			return err
 		}
 		if body, ok := errorskey["errors"]; ok {
-			return errors.Errorf("bad request: %s - %s", res.Status, body)
+			return fmt.Errorf("bad request: %s - %s", res.Status, body)
 		}
-		return errors.Errorf("bad request: %s - %s", res.Status, string(body))
+		return fmt.Errorf("bad request: %s - %s", res.Status, string(body))
 	}
 
-	return errors.Errorf("code: %d", res.StatusCode)
+	return fmt.Errorf("code: %d", res.StatusCode)
 }
