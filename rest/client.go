@@ -10,17 +10,31 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
+	"github.com/go-logr/logr"
+	"golang.org/x/time/rate"
 
 	"github.com/sp-yduck/proxmox-go/api"
 )
 
+const (
+	defaultUserAgent = "sp-yduck/proxmox-go"
+	defaultQPS       = 20
+)
+
 type RESTClient struct {
-	endpoint    string
-	httpClient  *http.Client
+	// proxmox rest api endpoint
+	endpoint string
+
+	httpClient *http.Client
+
+	tokenid     string
 	token       string
 	session     *api.Session
 	credentials *TicketRequest
+
+	rateLimiter *rate.Limiter
+
+	logger logr.Logger
 }
 
 type TicketRequest struct {
@@ -38,8 +52,9 @@ type ClientOption func(*RESTClient)
 
 func NewRESTClient(baseUrl string, opts ...ClientOption) (*RESTClient, error) {
 	client := &RESTClient{
-		endpoint:   complementURL(baseUrl),
-		httpClient: &http.Client{},
+		endpoint:    complementURL(baseUrl),
+		httpClient:  &http.Client{},
+		rateLimiter: rate.NewLimiter(rate.Every(1*time.Second), defaultQPS),
 	}
 
 	for _, option := range opts {
@@ -90,12 +105,30 @@ func WithUserPassword(username, password string) ClientOption {
 
 func WithAPIToken(tokenid, secret string) ClientOption {
 	return func(c *RESTClient) {
+		c.tokenid = tokenid
 		c.token = fmt.Sprintf("%s=%s", tokenid, secret)
 	}
 }
 
+func WithQPS(qps int) ClientOption {
+	return func(c *RESTClient) {
+		c.rateLimiter = rate.NewLimiter(rate.Every(1*time.Second), qps)
+	}
+}
+
+func WithLogger(logger logr.Logger) ClientOption {
+	return func(c *RESTClient) {
+		c.logger = logger
+	}
+}
+
+func (c *RESTClient) SetMaxQPS(qps int) {
+	c.rateLimiter = rate.NewLimiter(rate.Every(1*time.Second), qps)
+}
+
 func (c *RESTClient) Do(ctx context.Context, httpMethod, urlPath string, req, v interface{}) error {
 	endpoint := c.endpoint + urlPath
+	c.logger.V(1).Info(fmt.Sprintf("making %s request for %s", httpMethod, endpoint))
 
 	var body io.Reader
 	if req != nil {
@@ -104,6 +137,7 @@ func (c *RESTClient) Do(ctx context.Context, httpMethod, urlPath string, req, v 
 			return err
 		}
 		body = bytes.NewReader(jsonReq)
+		c.logger.WithValues("endpoint", endpoint).V(1).Info(fmt.Sprintf("request body: %s", string(jsonReq)))
 	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, httpMethod, endpoint, body)
@@ -113,26 +147,27 @@ func (c *RESTClient) Do(ctx context.Context, httpMethod, urlPath string, req, v 
 	httpReq.Header = c.makeAuthHeaders()
 	httpReq.Header.Add("Content-Type", "application/json")
 
+	if err := c.rateLimiter.Wait(ctx); err != nil {
+		return err
+	}
 	httpRsp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return err
 	}
 	defer httpRsp.Body.Close()
 
-	if err := checkResponse(httpRsp); err != nil {
+	buf, err := checkResponse(httpRsp)
+	if err != nil {
+		c.logger.V(0).Error(err, fmt.Sprintf("responce of %s:(%s): %s", endpoint, httpMethod, string(buf)))
 		if IsNotAuthorized(err) {
 			// try to remove expired ticket
 			c.session = nil
 		}
 		return err
 	}
+	c.logger.V(1).Info(fmt.Sprintf("responce of %s:(%s): %s", endpoint, httpMethod, string(buf)))
 
-	buf, err := io.ReadAll(httpRsp.Body)
-	if err != nil {
-		return err
-	}
-
-	// try unmarshalon {"data": any} firstly
+	// try unmarshal on {"data": any} firstly
 	var datakey map[string]json.RawMessage
 	if err := json.Unmarshal(buf, &datakey); err != nil {
 		return err
@@ -165,9 +200,11 @@ func (c *RESTClient) makeAuthHeaders() http.Header {
 	header.Add("Accept", "application/json")
 	if c.token != "" {
 		header.Add("Authorization", fmt.Sprintf("PVEAPIToken=%s", c.token))
+		header.Add("User-Agent", fmt.Sprintf("%s:%s", defaultUserAgent, c.tokenid))
 	} else if c.session != nil {
 		header.Add("Cookie", fmt.Sprintf("PVEAuthCookie=%s", c.session.Ticket))
 		header.Add("CSRFPreventionToken", c.session.CSRFPreventionToken)
+		header.Add("User-Agent", fmt.Sprintf("%s:%s", defaultUserAgent, c.session.Username))
 	}
 	return header
 }
@@ -181,33 +218,15 @@ func (c *RESTClient) makeNewSession(ctx context.Context) error {
 	return nil
 }
 
-func checkResponse(res *http.Response) error {
-	if res.StatusCode >= 200 && res.StatusCode <= 299 {
-		return nil
-	}
-
+func checkResponse(res *http.Response) ([]byte, error) {
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return errors.Errorf("failed to read body while handling http response of status %d : %v", res.StatusCode, err)
+		return nil, fmt.Errorf("failed to read body while handling http response of status %d : %v", res.StatusCode, err)
 	}
 
-	if res.StatusCode == http.StatusInternalServerError || res.StatusCode == http.StatusNotImplemented {
-		return &Error{code: res.StatusCode, returnMessage: res.Status}
-	}
-	if res.StatusCode == http.StatusUnauthorized || res.StatusCode == http.StatusForbidden {
-		return &Error{code: res.StatusCode, returnMessage: NotAuthorized}
+	if res.StatusCode >= 200 && res.StatusCode <= 299 {
+		return body, nil
 	}
 
-	if res.StatusCode == http.StatusBadRequest {
-		var errorskey map[string]json.RawMessage
-		if err := json.Unmarshal(body, &errorskey); err != nil {
-			return err
-		}
-		if body, ok := errorskey["errors"]; ok {
-			return errors.Errorf("bad request: %s - %s", res.Status, body)
-		}
-		return errors.Errorf("bad request: %s - %s", res.Status, string(body))
-	}
-
-	return errors.Errorf("code: %d", res.StatusCode)
+	return nil, NewError(res.StatusCode, res.Status, body)
 }

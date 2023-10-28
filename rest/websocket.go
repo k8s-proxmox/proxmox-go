@@ -23,7 +23,7 @@ func (c *RESTClient) DialNodeVNCWebSocket(ctx context.Context, nodeName string, 
 	conn, resp, err := c.websocketDialer().DialContext(ctx, websocketUrl, c.makeAuthHeaders())
 	if err != nil {
 		if resp != nil {
-			return nil, errors.Errorf("failed to dial websocket: %v : %v", checkResponse(resp), err)
+			return nil, errors.Errorf("failed to dial websocket: %v : %v", resp.Status, err)
 		}
 		return nil, errors.Errorf("failed to dial websocket: %v", err)
 	}

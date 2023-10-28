@@ -1,36 +1,48 @@
 package rest
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 const (
-	NotFound      = "resource not found"
-	NotAuthorized = "not authorized"
+	NotFound = "resource not found"
 )
 
 var (
-	NotFoundErr      = &Error{code: http.StatusNotFound, returnMessage: NotFound}
-	NotAuthorizedErr = &Error{code: http.StatusUnauthorized, returnMessage: NotAuthorized}
+	NotFoundErr = NewError(http.StatusNotFound, NotFound, []byte("from sp-yduck/proxmox-go"))
 )
 
+func NewError(code int, status string, body []byte) *Error {
+	return &Error{code: code, status: status, body: string(body)}
+}
+
 type Error struct {
-	code          int
-	returnMessage string
+	code   int
+	status string
+	body   string
 }
 
 func (e *Error) Error() string {
-	return e.returnMessage
+	return e.String()
+}
+
+func (e *Error) String() string {
+	return fmt.Sprintf("%d - %s - %s", e.code, e.status, e.body)
 }
 
 func IsNotFound(err error) bool {
-	if err == nil {
+	e, ok := err.(*Error)
+	if !ok {
 		return false
 	}
-	return err.Error() == NotFound
+	return e.code == http.StatusNotFound
 }
 
 func IsNotAuthorized(err error) bool {
-	if err == nil {
+	e, ok := err.(*Error)
+	if !ok {
 		return false
 	}
-	return err.Error() == NotAuthorized
+	return e.code == http.StatusUnauthorized
 }

@@ -18,7 +18,8 @@ func (s *TestSuite) TestVNCWebSocketClient() {
 		s.T().Fatalf("write error: %v", err)
 	}
 
-	ctx, _ := context.WithTimeout(context.TODO(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
+	defer cancel()
 	out, _, err := client.Read(ctx)
 	if err != nil {
 		s.T().Fatalf("failed read message: %v", err)
@@ -35,7 +36,8 @@ func (s *TestSuite) TestExec() {
 	}
 	defer client.Close()
 
-	ctx, _ := context.WithTimeout(context.TODO(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
+	defer cancel()
 	out, code, err := client.Exec(ctx, "whoami | base64 | base64 -d")
 	if err != nil {
 		s.T().Fatalf("failed to exec command: %s : %d : %v", out, code, err)
@@ -51,7 +53,8 @@ func (s *TestSuite) TestWriteFile() {
 	}
 	defer client.Close()
 
-	ctx, _ := context.WithTimeout(context.TODO(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), 15*time.Second)
+	defer cancel()
 	err = client.WriteFile(ctx, "this is a file content", "~/test-write-file.txt")
 	if err != nil {
 		s.T().Fatalf("failed to exec command: %v", err)
