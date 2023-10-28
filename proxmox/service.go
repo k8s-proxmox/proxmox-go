@@ -40,12 +40,10 @@ type ClientConfig struct {
 }
 
 type AuthConfig struct {
-	// user or token
-	AuthMethod string
-	Username   string
-	Password   string
-	TokenID    string
-	Secret     string
+	Username string
+	Password string
+	TokenID  string
+	Secret   string
 }
 
 func GetOrCreateService(params Params) (*Service, error) {
@@ -140,10 +138,10 @@ func (s *Service) RESTClient() *rest.RESTClient {
 }
 
 func makeLoginOpts(authConfig AuthConfig) (rest.ClientOption, error) {
-	if authConfig.AuthMethod == "token" && authConfig.TokenID != "" && authConfig.Secret != "" {
-		return rest.WithAPIToken(authConfig.TokenID, authConfig.Secret), nil
-	} else if authConfig.AuthMethod == "user" && authConfig.Username != "" && authConfig.Password != "" {
+	if authConfig.Username != "" && authConfig.Password != "" {
 		return rest.WithUserPassword(authConfig.Username, authConfig.Password), nil
+	} else if authConfig.TokenID != "" && authConfig.Secret != "" {
+		return rest.WithAPIToken(authConfig.TokenID, authConfig.Secret), nil
 	}
 	return nil, errors.New("invalid authentication config")
 }
@@ -152,16 +150,15 @@ func retrieveSessionKey(params Params) string {
 	var id string
 	var secret []byte
 	h := sha256.New()
-	switch params.authConfig.AuthMethod {
-	case "token":
-		id = params.authConfig.TokenID
-		h.Write([]byte(params.authConfig.Secret))
-		secret = h.Sum(nil)
-	case "user":
+	if params.authConfig.Username != "" && params.authConfig.Password != "" {
 		id = params.authConfig.Username
 		h.Write([]byte(params.authConfig.Password))
 		secret = h.Sum(nil)
-	default:
+	} else if params.authConfig.TokenID != "" && params.authConfig.Secret != "" {
+		id = params.authConfig.TokenID
+		h.Write([]byte(params.authConfig.Secret))
+		secret = h.Sum(nil)
+	} else {
 		id = params.authConfig.Username
 		h.Write([]byte(params.authConfig.Password))
 		secret = h.Sum(nil)

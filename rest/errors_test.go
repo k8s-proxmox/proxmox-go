@@ -10,14 +10,14 @@ func TestIsNotFound(t *testing.T) {
 		t.Error("failed to confirm it's \"not found error\"")
 	}
 
-	err = NotAuthorizedErr
+	err = NewError(403, "", nil)
 	if IsNotFound(err) {
 		t.Errorf("failed to confirm err=%v is not \"not found error\"", err)
 	}
 }
 
 func TestIsNotAuthorized(t *testing.T) {
-	err := NotAuthorizedErr
+	err := NewError(401, "", nil)
 	if !IsNotAuthorized(err) {
 		t.Error("failed to confirm it's \"not authorized error\"")
 	}

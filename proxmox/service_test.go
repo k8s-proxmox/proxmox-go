@@ -11,7 +11,6 @@ func TestGetOrCreateService(t *testing.T) {
 	password := os.Getenv("PROXMOX_PASSWORD")
 	tokeid := os.Getenv("PROXMOX_TOKENID")
 	secret := os.Getenv("PROXMOX_SECRET")
-	method := os.Getenv("PROXMOX_AUTH_METHOD")
 	if url == "" {
 		t.Fatal("url must not be empty")
 	}
@@ -19,11 +18,10 @@ func TestGetOrCreateService(t *testing.T) {
 	params := Params{
 		endpoint: url,
 		authConfig: AuthConfig{
-			AuthMethod: method,
-			Username:   user,
-			Password:   password,
-			TokenID:    tokeid,
-			Secret:     secret,
+			Username: user,
+			Password: password,
+			TokenID:  tokeid,
+			Secret:   secret,
 		},
 		clientConfig: ClientConfig{
 			InsecureSkipVerify: true,

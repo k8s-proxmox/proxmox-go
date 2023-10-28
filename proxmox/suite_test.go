@@ -18,7 +18,6 @@ func (s *TestSuite) SetupSuite() {
 	password := os.Getenv("PROXMOX_PASSWORD")
 	tokeid := os.Getenv("PROXMOX_TOKENID")
 	secret := os.Getenv("PROXMOX_SECRET")
-	method := os.Getenv("PROXMOX_AUTH_METHOD")
 	if url == "" {
 		s.T().Fatal("url must not be empty")
 	}
@@ -26,11 +25,10 @@ func (s *TestSuite) SetupSuite() {
 	params := Params{
 		endpoint: url,
 		authConfig: AuthConfig{
-			AuthMethod: method,
-			Username:   user,
-			Password:   password,
-			TokenID:    tokeid,
-			Secret:     secret,
+			Username: user,
+			Password: password,
+			TokenID:  tokeid,
+			Secret:   secret,
 		},
 		clientConfig: ClientConfig{
 			InsecureSkipVerify: true,
