@@ -165,3 +165,7 @@ func retrieveSessionKey(params Params) string {
 	}
 	return fmt.Sprintf("%s#%s#%x", params.endpoint, id, secret)
 }
+
+func NewParams(endpoint string, ac AuthConfig, cc ClientConfig) Params {
+	return Params{endpoint: endpoint, authConfig: ac, clientConfig: cc}
+}
