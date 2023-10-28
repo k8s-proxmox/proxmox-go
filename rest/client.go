@@ -10,20 +10,28 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/time/rate"
+
 	"github.com/sp-yduck/proxmox-go/api"
 )
 
 const (
 	defaultUserAgent = "sp-yduck/proxmox-go"
+	defaultQPS       = 20
 )
 
 type RESTClient struct {
-	endpoint    string
-	httpClient  *http.Client
+	// proxmox rest api endpoint
+	endpoint string
+
+	httpClient *http.Client
+
 	tokenid     string
 	token       string
 	session     *api.Session
 	credentials *TicketRequest
+
+	rateLimiter *rate.Limiter
 }
 
 type TicketRequest struct {
@@ -41,8 +49,9 @@ type ClientOption func(*RESTClient)
 
 func NewRESTClient(baseUrl string, opts ...ClientOption) (*RESTClient, error) {
 	client := &RESTClient{
-		endpoint:   complementURL(baseUrl),
-		httpClient: &http.Client{},
+		endpoint:    complementURL(baseUrl),
+		httpClient:  &http.Client{},
+		rateLimiter: rate.NewLimiter(rate.Every(1*time.Second), defaultQPS),
 	}
 
 	for _, option := range opts {
@@ -98,6 +107,16 @@ func WithAPIToken(tokenid, secret string) ClientOption {
 	}
 }
 
+func WithQPS(qps int) ClientOption {
+	return func(c *RESTClient) {
+		c.rateLimiter = rate.NewLimiter(rate.Every(1*time.Second), qps)
+	}
+}
+
+func (c *RESTClient) SetMaxQPS(qps int) {
+	c.rateLimiter = rate.NewLimiter(rate.Every(1*time.Second), qps)
+}
+
 func (c *RESTClient) Do(ctx context.Context, httpMethod, urlPath string, req, v interface{}) error {
 	endpoint := c.endpoint + urlPath
 
@@ -117,6 +136,9 @@ func (c *RESTClient) Do(ctx context.Context, httpMethod, urlPath string, req, v 
 	httpReq.Header = c.makeAuthHeaders()
 	httpReq.Header.Add("Content-Type", "application/json")
 
+	if err := c.rateLimiter.Wait(ctx); err != nil {
+		return err
+	}
 	httpRsp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return err
