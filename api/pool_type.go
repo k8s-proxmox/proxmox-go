@@ -5,8 +5,9 @@ type ResourcePool struct {
 	Comment string `json:"comment"`
 }
 
-type ResourcePoolMember struct {
-	Members []map[string]interface{} `json:"members"`
+type ResourcePoolConfig struct {
+	Comment string                    `json:"comment"`
+	Members []*map[string]interface{} `json:"members"`
 }
 
 type UpdateResourcePoolOption struct {

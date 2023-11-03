@@ -42,3 +42,12 @@ func (c *RESTClient) UpdateResourcePool(ctx context.Context, option api.UpdateRe
 	path := fmt.Sprintf("/pools/%s", option.PoolID)
 	return c.Put(ctx, path, option, nil)
 }
+
+func (c *RESTClient) GetResourcePoolConfig(ctx context.Context, id string) (*api.ResourcePoolConfig, error) {
+	path := fmt.Sprintf("/pools/%s", id)
+	var config *api.ResourcePoolConfig
+	if err := c.Get(ctx, path, &config); err != nil {
+		return nil, err
+	}
+	return config, nil
+}

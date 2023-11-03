@@ -3,6 +3,7 @@ package proxmox
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/sp-yduck/proxmox-go/api"
 )
@@ -35,12 +36,23 @@ func (s *Service) DeletePool(ctx context.Context, id string) error {
 	return s.restclient.DeleteResourcePool(ctx, id)
 }
 
+func IsAlreadyAPoolMemberErr(err error) bool {
+	return strings.Contains(err.Error(), "is already a pool member")
+}
+
+func IsNotAPoolMemberErr(err error) bool {
+	return strings.Contains(err.Error(), "is not a pool member")
+}
+
 func (p *Pool) AddVMs(ctx context.Context, vmids []int) error {
 	opts := api.UpdateResourcePoolOption{
 		PoolID: p.Pool.PoolID,
 		VMs:    itoaSlice(vmids),
 	}
-	return p.service.restclient.UpdateResourcePool(ctx, opts)
+	if err := p.service.restclient.UpdateResourcePool(ctx, opts); err != nil && !IsAlreadyAPoolMemberErr(err) {
+		return err
+	}
+	return nil
 }
 
 func (p *Pool) RemoveVMs(ctx context.Context, vmids []int) error {
@@ -49,7 +61,10 @@ func (p *Pool) RemoveVMs(ctx context.Context, vmids []int) error {
 		VMs:    itoaSlice(vmids),
 		Delete: true,
 	}
-	return p.service.restclient.UpdateResourcePool(ctx, opts)
+	if err := p.service.restclient.UpdateResourcePool(ctx, opts); err != nil && !IsNotAPoolMemberErr(err) {
+		return err
+	}
+	return nil
 }
 
 func (p *Pool) AddStorages(ctx context.Context, storageNames []string) error {
@@ -57,7 +72,10 @@ func (p *Pool) AddStorages(ctx context.Context, storageNames []string) error {
 		PoolID:  p.Pool.PoolID,
 		Storage: storageNames,
 	}
-	return p.service.restclient.UpdateResourcePool(ctx, opts)
+	if err := p.service.restclient.UpdateResourcePool(ctx, opts); err != nil && !IsAlreadyAPoolMemberErr(err) {
+		return err
+	}
+	return nil
 }
 
 func (p *Pool) RemoveStorages(ctx context.Context, storageNames []string) error {
@@ -66,7 +84,18 @@ func (p *Pool) RemoveStorages(ctx context.Context, storageNames []string) error 
 		Storage: storageNames,
 		Delete:  true,
 	}
-	return p.service.restclient.UpdateResourcePool(ctx, opts)
+	if err := p.service.restclient.UpdateResourcePool(ctx, opts); err != nil && !IsNotAPoolMemberErr(err) {
+		return err
+	}
+	return nil
+}
+
+func (p *Pool) GetMembers(ctx context.Context) ([]*map[string]interface{}, error) {
+	config, err := p.service.restclient.GetResourcePoolConfig(ctx, p.Pool.PoolID)
+	if err != nil {
+		return nil, err
+	}
+	return config.Members, nil
 }
 
 func itoaSlice(i []int) []string {

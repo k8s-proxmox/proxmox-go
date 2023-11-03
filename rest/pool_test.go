@@ -40,3 +40,14 @@ func (s *TestSuite) TestUpdateResourcePool() {
 		s.T().Fatalf("failed to update pool: %v", err)
 	}
 }
+
+func (s *TestSuite) TestGetResourcePoolConfig() {
+	config, err := s.restclient.GetResourcePoolConfig(context.Background(), "proxmox-go-test")
+	if err != nil {
+		s.T().Fatalf("failed to get pool config: %v", err)
+	}
+	s.T().Logf("get pool config: %v", *config)
+	// for _, m := range config.Members {
+	// 	s.T().Logf("get members: %v", m)
+	// }
+}
