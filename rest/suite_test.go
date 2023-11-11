@@ -34,15 +34,13 @@ func (s *TestSuite) SetupSuite() {
 		s.T().Fatal("username&password or tokeid&secret pair must be provided")
 	}
 
-	base := http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
+	base := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
 		},
 	}
 
-	restclient, err := NewRESTClient(url, loginOption, WithClient(&base))
+	restclient, err := NewRESTClient(url, loginOption, WithTransport(base))
 	if err != nil {
 		s.T().Logf("username=%s, password=%s, tokenid=%s, secret=%s", user, password, tokeid, secret)
 		s.T().Fatalf("failed to create rest client: %v", err)

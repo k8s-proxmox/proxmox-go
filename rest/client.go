@@ -12,8 +12,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"golang.org/x/time/rate"
-
-	"github.com/sp-yduck/proxmox-go/api"
 )
 
 const (
@@ -27,10 +25,7 @@ type RESTClient struct {
 
 	httpClient *http.Client
 
-	tokenid     string
-	token       string
-	session     *api.Session
-	credentials *TicketRequest
+	transport Transport
 
 	rateLimiter *rate.Limiter
 
@@ -48,7 +43,7 @@ type TicketRequest struct {
 	Realm string `json:"realm,omitempty"`
 }
 
-type ClientOption func(*RESTClient)
+type ClientOption func(*RESTClient) error
 
 func NewRESTClient(baseUrl string, opts ...ClientOption) (*RESTClient, error) {
 	client := &RESTClient{
@@ -58,16 +53,11 @@ func NewRESTClient(baseUrl string, opts ...ClientOption) (*RESTClient, error) {
 	}
 
 	for _, option := range opts {
-		option(client)
-	}
-
-	if client.token == "" && client.session == nil && client.credentials != nil {
-		ctx, cancel := context.WithTimeout(context.TODO(), 1*time.Minute)
-		defer cancel()
-		if err := client.MakeNewSession(ctx); err != nil {
+		if err := option(client); err != nil {
 			return nil, err
 		}
 	}
+
 	return client, nil
 }
 
@@ -79,46 +69,42 @@ func complementURL(url string) string {
 	return url
 }
 
-func WithClient(client *http.Client) ClientOption {
-	return func(c *RESTClient) {
-		c.httpClient = client
-	}
-}
-
-func WithSession(ticket, csrfPreventionToken string) ClientOption {
-	return func(c *RESTClient) {
-		c.session = &api.Session{
-			Ticket:              ticket,
-			CSRFPreventionToken: csrfPreventionToken,
-		}
+func WithTransport(transport http.RoundTripper) ClientOption {
+	return func(c *RESTClient) error {
+		c.transport.SetBase(transport)
+		return nil
 	}
 }
 
 func WithUserPassword(username, password string) ClientOption {
-	return func(c *RESTClient) {
-		c.credentials = &TicketRequest{
-			Username: username,
-			Password: password,
+	return func(c *RESTClient) error {
+		var err error
+		c.transport.AuthProvider, err = NewTicketProvider(c.endpoint, username, password)
+		if err != nil {
+			return err
 		}
+		return nil
 	}
 }
 
 func WithAPIToken(tokenid, secret string) ClientOption {
-	return func(c *RESTClient) {
-		c.tokenid = tokenid
-		c.token = fmt.Sprintf("%s=%s", tokenid, secret)
+	return func(c *RESTClient) error {
+		c.transport.AuthProvider = NewTokenProvider(tokenid, secret)
+		return nil
 	}
 }
 
 func WithQPS(qps int) ClientOption {
-	return func(c *RESTClient) {
+	return func(c *RESTClient) error {
 		c.rateLimiter = rate.NewLimiter(rate.Every(1*time.Second), qps)
+		return nil
 	}
 }
 
 func WithLogger(logger logr.Logger) ClientOption {
-	return func(c *RESTClient) {
+	return func(c *RESTClient) error {
 		c.logger = logger
+		return nil
 	}
 }
 
@@ -144,8 +130,8 @@ func (c *RESTClient) Do(ctx context.Context, httpMethod, urlPath string, req, v 
 	if err != nil {
 		return err
 	}
-	httpReq.Header = c.makeAuthHeaders()
 	httpReq.Header.Add("Content-Type", "application/json")
+	httpReq.Header.Add("Accept", "application/json")
 
 	if err := c.rateLimiter.Wait(ctx); err != nil {
 		return err
@@ -159,10 +145,6 @@ func (c *RESTClient) Do(ctx context.Context, httpMethod, urlPath string, req, v 
 	buf, err := checkResponse(httpRsp)
 	if err != nil {
 		c.logger.V(0).Error(err, fmt.Sprintf("responce of %s:(%s): %s", endpoint, httpMethod, string(buf)))
-		if IsNotAuthorized(err) {
-			// try to remove expired ticket
-			c.session = nil
-		}
 		return err
 	}
 	c.logger.V(1).Info(fmt.Sprintf("responce of %s:(%s): %s", endpoint, httpMethod, string(buf)))
@@ -193,29 +175,6 @@ func (c *RESTClient) Put(ctx context.Context, path string, req, res interface{})
 
 func (c *RESTClient) Delete(ctx context.Context, path string, req, res interface{}) error {
 	return c.Do(ctx, http.MethodDelete, path, req, res)
-}
-
-func (c *RESTClient) makeAuthHeaders() http.Header {
-	header := make(http.Header)
-	header.Add("Accept", "application/json")
-	if c.token != "" {
-		header.Add("Authorization", fmt.Sprintf("PVEAPIToken=%s", c.token))
-		header.Add("User-Agent", fmt.Sprintf("%s:%s", defaultUserAgent, c.tokenid))
-	} else if c.session != nil {
-		header.Add("Cookie", fmt.Sprintf("PVEAuthCookie=%s", c.session.Ticket))
-		header.Add("CSRFPreventionToken", c.session.CSRFPreventionToken)
-		header.Add("User-Agent", fmt.Sprintf("%s:%s", defaultUserAgent, c.session.Username))
-	}
-	return header
-}
-
-func (c *RESTClient) MakeNewSession(ctx context.Context) error {
-	var err error
-	c.session, err = c.PostTicket(ctx, *c.credentials)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func checkResponse(res *http.Response) ([]byte, error) {

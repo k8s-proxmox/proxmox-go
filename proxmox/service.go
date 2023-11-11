@@ -1,7 +1,6 @@
 package proxmox
 
 import (
-	"context"
 	"crypto/sha256"
 	"crypto/tls"
 	"errors"
@@ -53,17 +52,7 @@ func GetOrCreateService(params Params) (*Service, error) {
 
 	key := retrieveSessionKey(params)
 	if cachedSession, ok := sessionCache.Load(key); ok {
-		svc := cachedSession.(*Service)
-		if err := svc.restclient.MakeNewSession(context.Background()); err != nil {
-			// failed to refresh session. just try to create new svc
-			s, err := NewService(params)
-			if err != nil {
-				return nil, err
-			}
-			sessionCache.Store(key, s)
-			return s, nil
-		}
-		return svc, nil
+		return cachedSession.(*Service), nil
 	}
 
 	s, err := NewService(params)
@@ -82,14 +71,12 @@ func NewService(params Params) (*Service, error) {
 	clientOptions := []rest.ClientOption{loginOption}
 
 	if params.clientConfig.InsecureSkipVerify {
-		baseClient := &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					InsecureSkipVerify: true,
-				},
+		baseTransport := &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
 			},
 		}
-		clientOptions = append(clientOptions, rest.WithClient(baseClient))
+		clientOptions = append(clientOptions, rest.WithTransport(baseTransport))
 	}
 
 	restclient, err := rest.NewRESTClient(params.endpoint, clientOptions...)
@@ -105,14 +92,12 @@ func NewServiceWithUserPassword(url, user, password string, insecure bool) (*Ser
 	}
 
 	if insecure {
-		baseClient := &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					InsecureSkipVerify: true,
-				},
+		baseTransport := &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
 			},
 		}
-		clientOptions = append(clientOptions, rest.WithClient(baseClient))
+		clientOptions = append(clientOptions, rest.WithTransport(baseTransport))
 	}
 
 	restclient, err := rest.NewRESTClient(url, clientOptions...)
@@ -127,14 +112,12 @@ func NewServiceWithAPIToken(url, tokenid, secret string, insecure bool) (*Servic
 		rest.WithAPIToken(tokenid, secret),
 	}
 	if insecure {
-		baseClient := &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					InsecureSkipVerify: true,
-				},
+		baseTransport := &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
 			},
 		}
-		clientOptions = append(clientOptions, rest.WithClient(baseClient))
+		clientOptions = append(clientOptions, rest.WithTransport(baseTransport))
 	}
 
 	restclient, err := rest.NewRESTClient(url, clientOptions...)

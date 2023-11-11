@@ -20,7 +20,11 @@ func (c *RESTClient) DialNodeVNCWebSocket(ctx context.Context, nodeName string, 
 	baseUrl = strings.Replace(baseUrl, "http://", "wss://", 1)
 	websocketUrl := fmt.Sprintf("%s/nodes/%s/vncwebsocket?port=%s&vncticket=%s", baseUrl, nodeName, vnc.Port, url.QueryEscape(vnc.Ticket))
 
-	conn, resp, err := c.websocketDialer().DialContext(ctx, websocketUrl, c.makeAuthHeaders())
+	header := make(http.Header)
+	if err := c.transport.addAuthHeader(&header); err != nil {
+		return nil, err
+	}
+	conn, resp, err := c.websocketDialer().DialContext(ctx, websocketUrl, header)
 	if err != nil {
 		if resp != nil {
 			return nil, errors.Errorf("failed to dial websocket: %v : %v", resp.Status, err)
