@@ -1,6 +1,10 @@
 package rest
 
 import (
+	"bytes"
+	"context"
+	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"sync"
@@ -104,16 +108,20 @@ func (t *TokenProvider) addAuthHeader(header *http.Header) error {
 
 // AuthProvider implementation
 type TicketProvider struct {
-	baseUrl string
-	session *api.Session
-	expiry  time.Time
-	mu      sync.Mutex
+	baseUrl  string
+	username string
+	password string
+	session  *api.Session
+	expiry   time.Time
+	mu       sync.Mutex
 }
 
 func NewTicketProvider(baseUrl, username, password string) (*TicketProvider, error) {
 	t := &TicketProvider{
-		baseUrl: baseUrl,
-		mu:      sync.Mutex{},
+		baseUrl:  baseUrl,
+		username: username,
+		password: password,
+		mu:       sync.Mutex{},
 	}
 	req := TicketRequest{Username: username, Password: password}
 	if err := t.startNewSession(req); err != nil {
@@ -136,7 +144,7 @@ func (t *TicketProvider) Session() (*api.Session, error) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	if t.ExpiryDelta() < 5*time.Minute {
-		req := TicketRequest{Username: "dummy", Password: "dummy"}
+		req := TicketRequest{Username: t.username, Password: t.password}
 		if err := t.startNewSession(req); err != nil {
 			return nil, err
 		}
@@ -145,7 +153,7 @@ func (t *TicketProvider) Session() (*api.Session, error) {
 }
 
 func (t *TicketProvider) startNewSession(req TicketRequest) error {
-	session, err := retrieveSessionTokens(t.baseUrl, req)
+	session, err := t.retrieveSessionTokens(req)
 	if err != nil {
 		return err
 	}
@@ -155,6 +163,47 @@ func (t *TicketProvider) startNewSession(req TicketRequest) error {
 	// https://pve.proxmox.com/wiki/Proxmox_VE_API#Ticket_Cookie
 	t.expiry = time.Now().Add(2 * time.Hour)
 	return nil
+}
+
+func (t *TicketProvider) retrieveSessionTokens(req TicketRequest) (*api.Session, error) {
+	endpoint := t.baseUrl + "/access/ticket"
+	jsonReq, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	body := bytes.NewReader(jsonReq)
+	httpReq, err := http.NewRequestWithContext(context.Background(), http.MethodPost, endpoint, body)
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Add("Content-Type", "application/json")
+	// to do : client should be inherited from RESTClient or so
+	client := &http.Client{Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	},
+	}
+	httpRsp, err := client.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpRsp.Body.Close()
+
+	buf, err := checkResponse(httpRsp)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve session token: %v", err)
+	}
+	var datakey map[string]json.RawMessage
+	if err := json.Unmarshal(buf, &datakey); err != nil {
+		return nil, err
+	}
+	var session *api.Session
+	data := datakey["data"]
+	if err := json.Unmarshal(data, &session); err != nil {
+		return nil, err
+	}
+	return session, nil
 }
 
 func (t *TicketProvider) addAuthHeader(header *http.Header) error {

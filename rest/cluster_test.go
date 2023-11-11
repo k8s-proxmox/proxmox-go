@@ -1,6 +1,8 @@
 package rest
 
-import "context"
+import (
+	"context"
+)
 
 func (s *TestSuite) TestGetNextID() {
 	nextid, err := s.restclient.GetNextID(context.TODO())

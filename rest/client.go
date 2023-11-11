@@ -25,7 +25,7 @@ type RESTClient struct {
 
 	httpClient *http.Client
 
-	transport Transport
+	transport *Transport
 
 	rateLimiter *rate.Limiter
 
@@ -49,15 +49,15 @@ func NewRESTClient(baseUrl string, opts ...ClientOption) (*RESTClient, error) {
 	client := &RESTClient{
 		endpoint:    complementURL(baseUrl),
 		httpClient:  &http.Client{},
+		transport:   &Transport{},
 		rateLimiter: rate.NewLimiter(rate.Every(1*time.Second), defaultQPS),
 	}
-
 	for _, option := range opts {
 		if err := option(client); err != nil {
 			return nil, err
 		}
 	}
-
+	client.httpClient = &http.Client{Transport: client.transport}
 	return client, nil
 }
 
