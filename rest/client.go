@@ -64,7 +64,7 @@ func NewRESTClient(baseUrl string, opts ...ClientOption) (*RESTClient, error) {
 	if client.token == "" && client.session == nil && client.credentials != nil {
 		ctx, cancel := context.WithTimeout(context.TODO(), 1*time.Minute)
 		defer cancel()
-		if err := client.makeNewSession(ctx); err != nil {
+		if err := client.MakeNewSession(ctx); err != nil {
 			return nil, err
 		}
 	}
@@ -209,7 +209,7 @@ func (c *RESTClient) makeAuthHeaders() http.Header {
 	return header
 }
 
-func (c *RESTClient) makeNewSession(ctx context.Context) error {
+func (c *RESTClient) MakeNewSession(ctx context.Context) error {
 	var err error
 	c.session, err = c.PostTicket(ctx, *c.credentials)
 	if err != nil {

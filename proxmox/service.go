@@ -1,6 +1,7 @@
 package proxmox
 
 import (
+	"context"
 	"crypto/sha256"
 	"crypto/tls"
 	"errors"
@@ -52,7 +53,17 @@ func GetOrCreateService(params Params) (*Service, error) {
 
 	key := retrieveSessionKey(params)
 	if cachedSession, ok := sessionCache.Load(key); ok {
-		return cachedSession.(*Service), nil
+		svc := cachedSession.(*Service)
+		if err := svc.restclient.MakeNewSession(context.Background()); err != nil {
+			// failed to refresh session. just try to create new svc
+			s, err := NewService(params)
+			if err != nil {
+				return nil, err
+			}
+			sessionCache.Store(key, s)
+			return s, nil
+		}
+		return svc, nil
 	}
 
 	s, err := NewService(params)
