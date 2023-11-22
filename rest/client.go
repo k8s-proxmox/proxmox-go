@@ -25,8 +25,6 @@ type RESTClient struct {
 
 	httpClient *http.Client
 
-	transport *Transport
-
 	rateLimiter *rate.Limiter
 
 	logger logr.Logger
@@ -45,11 +43,10 @@ type TicketRequest struct {
 
 type ClientOption func(*RESTClient) error
 
-func NewRESTClient(baseUrl string, opts ...ClientOption) (*RESTClient, error) {
+func NewRESTClient(baseUrl string, transport http.RoundTripper, opts ...ClientOption) (*RESTClient, error) {
 	client := &RESTClient{
 		endpoint:    complementURL(baseUrl),
-		httpClient:  &http.Client{},
-		transport:   &Transport{},
+		httpClient:  &http.Client{Transport: transport},
 		rateLimiter: rate.NewLimiter(rate.Every(1*time.Second), defaultQPS),
 	}
 	for _, option := range opts {
@@ -57,7 +54,6 @@ func NewRESTClient(baseUrl string, opts ...ClientOption) (*RESTClient, error) {
 			return nil, err
 		}
 	}
-	client.httpClient = &http.Client{Transport: client.transport}
 	return client, nil
 }
 
@@ -69,27 +65,18 @@ func complementURL(url string) string {
 	return url
 }
 
-func WithTransport(transport http.RoundTripper) ClientOption {
-	return func(c *RESTClient) error {
-		c.transport.SetBase(transport)
-		return nil
-	}
-}
-
 func WithUserPassword(username, password string) ClientOption {
 	return func(c *RESTClient) error {
-		var err error
-		c.transport.AuthProvider, err = NewTicketProvider(c.endpoint, username, password)
-		if err != nil {
-			return err
-		}
+		authProvider := NewTicketProvider(c.httpClient.Transport, c.endpoint, username, password)
+		c.httpClient.Transport = &Transport{Base: c.httpClient.Transport, AuthProvider: authProvider}
 		return nil
 	}
 }
 
 func WithAPIToken(tokenid, secret string) ClientOption {
 	return func(c *RESTClient) error {
-		c.transport.AuthProvider = NewTokenProvider(tokenid, secret)
+		authProvider := NewTokenProvider(tokenid, secret)
+		c.httpClient.Transport = &Transport{Base: c.httpClient.Transport, AuthProvider: authProvider}
 		return nil
 	}
 }
@@ -110,6 +97,10 @@ func WithLogger(logger logr.Logger) ClientOption {
 
 func (c *RESTClient) SetMaxQPS(qps int) {
 	c.rateLimiter = rate.NewLimiter(rate.Every(1*time.Second), qps)
+}
+
+func (c *RESTClient) SetLogger(logger logr.Logger) {
+	c.logger = logger
 }
 
 func (c *RESTClient) Do(ctx context.Context, httpMethod, urlPath string, req, v interface{}) error {

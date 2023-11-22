@@ -3,7 +3,6 @@ package rest
 import (
 	"bytes"
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -108,30 +107,32 @@ func (t *TokenProvider) addAuthHeader(header *http.Header) error {
 
 // AuthProvider implementation
 type TicketProvider struct {
-	baseUrl  string
-	username string
-	password string
-	session  *api.Session
-	expiry   time.Time
-	mu       sync.Mutex
+	baseUrl       string
+	baseTransport http.RoundTripper
+	username      string
+	password      string
+	session       *api.Session
+	expiry        time.Time
+	mu            sync.Mutex
 }
 
-func NewTicketProvider(baseUrl, username, password string) (*TicketProvider, error) {
+func NewTicketProvider(baseTransport http.RoundTripper, baseUrl, username, password string) *TicketProvider {
 	t := &TicketProvider{
-		baseUrl:  baseUrl,
-		username: username,
-		password: password,
-		mu:       sync.Mutex{},
+		baseUrl:       baseUrl,
+		baseTransport: baseTransport,
+		username:      username,
+		password:      password,
+		expiry:        time.Now(),
+		mu:            sync.Mutex{},
 	}
-	req := TicketRequest{Username: username, Password: password}
-	if err := t.startNewSession(req); err != nil {
-		return nil, err
-	}
-	return t, nil
+	return t
 }
 
-func (t *TicketProvider) Valid() bool {
-	return true
+func (t *TicketProvider) base() http.RoundTripper {
+	if t.baseTransport != nil {
+		return t.baseTransport
+	}
+	return http.DefaultTransport
 }
 
 func (t *TicketProvider) ExpiryDelta() time.Duration {
@@ -177,13 +178,7 @@ func (t *TicketProvider) retrieveSessionTokens(req TicketRequest) (*api.Session,
 		return nil, err
 	}
 	httpReq.Header.Add("Content-Type", "application/json")
-	// to do : client should be inherited from RESTClient or so
-	client := &http.Client{Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
-	},
-	}
+	client := &http.Client{Transport: t.base()}
 	httpRsp, err := client.Do(httpReq)
 	if err != nil {
 		return nil, err

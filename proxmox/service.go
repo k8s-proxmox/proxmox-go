@@ -70,16 +70,16 @@ func NewService(params Params) (*Service, error) {
 	}
 	clientOptions := []rest.ClientOption{loginOption}
 
+	var baseTransport http.RoundTripper
 	if params.clientConfig.InsecureSkipVerify {
-		baseTransport := &http.Transport{
+		baseTransport = &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
 			},
 		}
-		clientOptions = append(clientOptions, rest.WithTransport(baseTransport))
 	}
 
-	restclient, err := rest.NewRESTClient(params.endpoint, clientOptions...)
+	restclient, err := rest.NewRESTClient(params.endpoint, baseTransport, clientOptions...)
 	if err != nil {
 		return nil, err
 	}
@@ -91,16 +91,16 @@ func NewServiceWithUserPassword(url, user, password string, insecure bool) (*Ser
 		rest.WithUserPassword(user, password),
 	}
 
+	var baseTransport http.RoundTripper
 	if insecure {
-		baseTransport := &http.Transport{
+		baseTransport = &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
 			},
 		}
-		clientOptions = append(clientOptions, rest.WithTransport(baseTransport))
 	}
 
-	restclient, err := rest.NewRESTClient(url, clientOptions...)
+	restclient, err := rest.NewRESTClient(url, baseTransport, clientOptions...)
 	if err != nil {
 		return nil, err
 	}
@@ -111,16 +111,17 @@ func NewServiceWithAPIToken(url, tokenid, secret string, insecure bool) (*Servic
 	clientOptions := []rest.ClientOption{
 		rest.WithAPIToken(tokenid, secret),
 	}
+
+	var baseTransport http.RoundTripper
 	if insecure {
-		baseTransport := &http.Transport{
+		baseTransport = &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
 			},
 		}
-		clientOptions = append(clientOptions, rest.WithTransport(baseTransport))
 	}
 
-	restclient, err := rest.NewRESTClient(url, clientOptions...)
+	restclient, err := rest.NewRESTClient(url, baseTransport, clientOptions...)
 	if err != nil {
 		return nil, err
 	}
