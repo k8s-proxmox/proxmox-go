@@ -71,3 +71,14 @@ func (s *TestSuite) TestCreateDeleteStorage() {
 		s.T().Fatalf("failed to delete storage(name=%s): %v", testStorageName, err)
 	}
 }
+
+func (s *TestSuite) TestDownloadFromURL() {
+	node := "assam"
+	storage := "local"
+	opts := api.ContentDownloadOption{Content: "iso", Filename: "test.img", URL: "https://cloud-images.ubuntu.com/jammy/20231027/jammy-server-cloudimg-amd64-disk-kvm.img"}
+	upid, err := s.restclient.DownloadFromURL(context.Background(), node, storage, opts)
+	if err != nil {
+		s.T().Fatalf("failed to download iso image: %v", err)
+	}
+	s.T().Logf("downloading iso: %v", upid)
+}

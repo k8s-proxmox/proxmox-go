@@ -45,3 +45,12 @@ func (c *RESTClient) DeleteStorage(ctx context.Context, name string) error {
 	}
 	return nil
 }
+
+func (c *RESTClient) DownloadFromURL(ctx context.Context, node, storage string, option api.ContentDownloadOption) (*string, error) {
+	path := fmt.Sprintf("/nodes/%s/storage/%s/download-url", node, storage)
+	var upid *string
+	if err := c.Post(ctx, path, option, &upid); err != nil {
+		return nil, err
+	}
+	return upid, nil
+}
