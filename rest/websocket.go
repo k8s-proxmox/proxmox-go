@@ -21,10 +21,18 @@ func (c *RESTClient) DialNodeVNCWebSocket(ctx context.Context, nodeName string, 
 	websocketUrl := fmt.Sprintf("%s/nodes/%s/vncwebsocket?port=%s&vncticket=%s", baseUrl, nodeName, vnc.Port, url.QueryEscape(vnc.Ticket))
 
 	header := make(http.Header)
-	if err := c.transport.addAuthHeader(&header); err != nil {
+	transport, ok := c.httpClient.Transport.(*Transport)
+	if !ok {
+		return nil, fmt.Errorf("not implement Transport interface")
+	}
+	if err := transport.addAuthHeader(&header); err != nil {
 		return nil, err
 	}
-	conn, resp, err := c.websocketDialer().DialContext(ctx, websocketUrl, header)
+	dialer, err := c.websocketDialer()
+	if err != nil {
+		return nil, err
+	}
+	conn, resp, err := dialer.DialContext(ctx, websocketUrl, header)
 	if err != nil {
 		if resp != nil {
 			return nil, errors.Errorf("failed to dial websocket: %v : %v", resp.Status, err)
@@ -39,15 +47,19 @@ func (c *RESTClient) DialNodeVNCWebSocket(ctx context.Context, nodeName string, 
 	return conn, nil
 }
 
-func (c *RESTClient) websocketDialer() *websocket.Dialer {
+func (c *RESTClient) websocketDialer() (*websocket.Dialer, error) {
 	var tlsConfig *tls.Config
-	transport := c.httpClient.Transport.(*http.Transport)
-	if transport != nil {
-		tlsConfig = transport.TLSClientConfig
+	transport, ok := c.httpClient.Transport.(*Transport)
+	if !ok {
+		return nil, fmt.Errorf("not implement Transport interface")
+	}
+	baseTransport := transport.base().(*http.Transport)
+	if baseTransport != nil {
+		tlsConfig = baseTransport.TLSClientConfig
 	}
 	return &websocket.Dialer{
 		Proxy:            http.ProxyFromEnvironment,
 		HandshakeTimeout: 30 * time.Second,
 		TLSClientConfig:  tlsConfig,
-	}
+	}, nil
 }

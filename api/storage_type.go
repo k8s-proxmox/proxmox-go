@@ -123,3 +123,16 @@ type StorageVolume struct {
 	Size   int    `json:",omitempty"`
 	Used   int    `json:",omitempty"`
 }
+
+type ContentDownloadOption struct {
+	// content type: iso or vztmpl
+	Content  string `json:"content"`
+	Filename string `json:"filename"`
+	Node     string `json:"node,omitempty"`
+	Storage  string `json:"storage,omitempty"`
+	URL      string `json:"url"`
+	Checksum string `json:"checksum,omitempty"`
+	// md5, sha1, sha224, sha256, sha384, sha512
+	ChecksumAlgorithm  string `json:"checksum-algorithm,omitempty"`
+	VerifyCertificates bool   `json:"verify-certificates"`
+}
