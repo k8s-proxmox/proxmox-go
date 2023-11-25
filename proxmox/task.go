@@ -14,8 +14,7 @@ const (
 )
 
 func (s *Service) MustGetTask(ctx context.Context, node string, upid string) (*api.Task, error) {
-	time.Sleep(time.Second * 60)
-	for i := 0; i < 40; i++ {
+	for i := 0; i < 60; i++ {
 		task, err := s.restclient.GetTask(ctx, node, upid)
 		if err != nil {
 			if rest.IsNotFound(err) {
