@@ -98,6 +98,26 @@ func (s *Service) VirtualMachineFromUUID(ctx context.Context, uuid string) (*Vir
 	return nil, rest.NotFoundErr
 }
 
+// return true if there is any vm having specified name
+func (s *Service) VirtualMachineExistsWithName(ctx context.Context, name string) (bool, error) {
+	nodes, err := s.Nodes(ctx)
+	if err != nil {
+		return false, err
+	}
+	for _, node := range nodes {
+		vms, err := s.restclient.GetVirtualMachines(ctx, node.Node)
+		if err != nil {
+			continue
+		}
+		for _, vm := range vms {
+			if vm.Name == name {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
+}
+
 func ConvertSMBiosToUUID(smbios string) (string, error) {
 	re := regexp.MustCompile(fmt.Sprintf("uuid=%s", UUIDFormat))
 	match := re.FindString(smbios)
