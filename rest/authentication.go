@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sp-yduck/proxmox-go/api"
+	"github.com/k8s-proxmox/proxmox-go/api"
 )
 
 // implementation of http.RoundTripper

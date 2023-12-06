@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/sp-yduck/proxmox-go/api"
-	"github.com/sp-yduck/proxmox-go/rest"
+	"github.com/k8s-proxmox/proxmox-go/api"
+	"github.com/k8s-proxmox/proxmox-go/rest"
 )
 
 type Storage struct {

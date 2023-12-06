@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sp-yduck/proxmox-go/api"
+	"github.com/k8s-proxmox/proxmox-go/api"
 )
 
 func (c *RESTClient) GetTasks(ctx context.Context, node string) ([]*api.Task, error) {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/sp-yduck/proxmox-go/api"
+	"github.com/k8s-proxmox/proxmox-go/api"
 )
 
 func (s *TestSuite) TestGetStorages() {

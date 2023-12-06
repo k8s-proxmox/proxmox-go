@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/sp-yduck/proxmox-go/api"
+	"github.com/k8s-proxmox/proxmox-go/api"
 )
 
 func (c *RESTClient) GetNodes(ctx context.Context) ([]*api.Node, error) {

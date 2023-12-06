@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/gorilla/websocket"
-	"github.com/sp-yduck/proxmox-go/api"
+	"github.com/k8s-proxmox/proxmox-go/api"
 )
 
 const (

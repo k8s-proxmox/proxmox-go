@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/sp-yduck/proxmox-go/rest"
+	"github.com/k8s-proxmox/proxmox-go/rest"
 )
 
 var (

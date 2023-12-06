@@ -1,4 +1,4 @@
-module github.com/sp-yduck/proxmox-go
+module github.com/k8s-proxmox/proxmox-go
 
 go 1.20
 

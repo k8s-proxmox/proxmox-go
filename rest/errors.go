@@ -10,7 +10,7 @@ const (
 )
 
 var (
-	NotFoundErr = NewError(http.StatusNotFound, NotFound, []byte("from sp-yduck/proxmox-go"))
+	NotFoundErr = NewError(http.StatusNotFound, NotFound, []byte("from k8s-proxmox/proxmox-go"))
 )
 
 func NewError(code int, status string, body []byte) *Error {

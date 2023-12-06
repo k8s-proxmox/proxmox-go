@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	defaultUserAgent = "sp-yduck/proxmox-go"
+	defaultUserAgent = "k8s-proxmox/proxmox-go"
 	defaultQPS       = 20
 )
 
