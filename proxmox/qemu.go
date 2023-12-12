@@ -139,6 +139,17 @@ func ConvertSMBiosToUUID(smbios string) (string, error) {
 	return strings.Split(match, "=")[1], nil
 }
 
+func (c *VirtualMachine) Clone(ctx context.Context, newid int, option api.VirtualMachineCloneOption) (*VirtualMachine, error) {
+	taskid, err := c.restclient.CreateVirtualMachineClone(ctx, c.Node, c.VM.VMID, newid, option)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.service.EnsureTaskDone(ctx, c.Node, *taskid); err != nil {
+		return nil, err
+	}
+	return c.service.VirtualMachine(ctx, newid)
+}
+
 func (c *VirtualMachine) Delete(ctx context.Context) error {
 	path := fmt.Sprintf("/nodes/%s/qemu/%d", c.Node, c.VM.VMID)
 	var upid string
