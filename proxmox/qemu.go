@@ -69,6 +69,17 @@ func (s *Service) CreateVirtualMachine(ctx context.Context, node string, vmid in
 	return s.VirtualMachine(ctx, vmid)
 }
 
+func (s *Service) CloneVirtualMachine(ctx context.Context, node string, vmid int, newid int, option api.VirtualMachineCloneOption) (*VirtualMachine, error) {
+	taskid, err := s.restclient.CreateVirtualMachineClone(ctx, node, vmid, newid, option)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.EnsureTaskDone(ctx, node, *taskid); err != nil {
+		return nil, err
+	}
+	return s.VirtualMachine(ctx, newid)
+}
+
 // VirtualMachineFromUUID attempts to find virtual machine based on SMBIOS UUID. It will ignore any error that prevents
 // it from inspecting additional virtual machines (e.g. offline node, vm config not accessible, malformed uuids)
 func (s *Service) VirtualMachineFromUUID(ctx context.Context, uuid string) (*VirtualMachine, error) {
@@ -147,6 +158,15 @@ func (c *VirtualMachine) GetConfig(ctx context.Context) (*api.VirtualMachineConf
 	}
 	c.config = config
 	return c.config, err
+}
+
+// Set virtual machine options (asynchrounous API).
+func (c *VirtualMachine) SetConfigAsync(ctx context.Context, config api.VirtualMachineConfig) error {
+	taskid, err := c.restclient.SetVirtualMachineConfigAsync(ctx, c.Node, c.VM.VMID, config)
+	if err != nil {
+		return err
+	}
+	return c.service.EnsureTaskDone(ctx, c.Node, *taskid)
 }
 
 func (c *VirtualMachine) GetOSInfo(ctx context.Context) (*api.OSInfo, error) {

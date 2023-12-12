@@ -57,6 +57,16 @@ func (c *RESTClient) GetVirtualMachineConfig(ctx context.Context, node string, v
 	return config, nil
 }
 
+// Set virtual machine options (asynchrounous API).
+func (c *RESTClient) SetVirtualMachineConfigAsync(ctx context.Context, node string, vmid int, options api.VirtualMachineConfig) (*string, error) {
+	path := fmt.Sprintf("/nodes/%s/qemu/%d/config", node, vmid)
+	var upid *string
+	if err := c.Post(ctx, path, options, &upid); err != nil {
+		return nil, err
+	}
+	return upid, nil
+}
+
 func (c *RESTClient) GetVirtualMachineStatus(ctx context.Context, node string, vmid int) (*api.ProcessStatus, error) {
 	path := fmt.Sprintf("/nodes/%s/qemu/%d/status", node, vmid)
 	var status *api.ProcessStatus
@@ -64,4 +74,16 @@ func (c *RESTClient) GetVirtualMachineStatus(ctx context.Context, node string, v
 		return nil, err
 	}
 	return status, nil
+}
+
+func (c *RESTClient) CreateVirtualMachineClone(ctx context.Context, node string, templateid, vmid int, option api.VirtualMachineCloneOption) (*string, error) {
+	option.Node = node
+	option.VMID = templateid
+	option.NewID = vmid
+	path := fmt.Sprintf("/nodes/%s/qemu/%d/clone", node, templateid)
+	var upid *string
+	if err := c.Post(ctx, path, option, &upid); err != nil {
+		return nil, err
+	}
+	return upid, nil
 }

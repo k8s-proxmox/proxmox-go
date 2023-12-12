@@ -43,3 +43,29 @@ func (s *TestSuite) TestGetVirtualMachineConfig() {
 	}
 	s.T().Logf("get vm config: %v", *config)
 }
+
+func (s *TestSuite) TestSetVirtualMachineConfigAsync() {
+	nodeName := "assam"
+	vmid := 999
+	config := api.VirtualMachineConfig{
+		CiPassword: "pve",
+		CiUser:     "pve",
+	}
+	upid, err := s.restclient.SetVirtualMachineConfigAsync(context.TODO(), nodeName, vmid, config)
+	if err != nil {
+		s.T().Fatalf("failed to set vm: %v", err)
+	}
+	s.T().Logf("set vm config: %s", *upid)
+
+}
+
+func (s *TestSuite) TestCreateVirtualMachineClone() {
+	nodeName := s.GetTestNode().Node
+	vmid := s.GetTestVM().VMID
+	option := api.VirtualMachineCloneOption{}
+	upid, err := s.restclient.CreateVirtualMachineClone(context.TODO(), nodeName, vmid, 999, option)
+	if err != nil {
+		s.T().Fatalf("failed to clone vm: %v", err)
+	}
+	s.T().Logf("clone vm: %s", *upid)
+}
