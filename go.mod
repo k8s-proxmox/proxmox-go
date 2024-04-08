@@ -1,4 +1,4 @@
-module github.com/k8s-proxmox/proxmox-go
+module github.com/gecgooden/proxmox-go
 
 go 1.20
 

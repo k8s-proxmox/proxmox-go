@@ -2,7 +2,27 @@ package api
 
 import (
 	"encoding/json"
+	"strconv"
+	"strings"
 )
+
+type StringOrInt int
+
+func (d *StringOrInt) UnmarshalJSON(b []byte) error {
+	str := strings.Replace(string(b), "\"", "", -1)
+	if str == "" {
+		*d = StringOrInt(0)
+		return nil
+	}
+
+	parsed, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	*d = StringOrInt(parsed)
+	return nil
+}
 
 type VirtualMachine struct {
 	Cpu       float32       `json:",omitempty"`
@@ -496,7 +516,7 @@ type VirtualMachineConfig struct {
 	// specifies the QEMU machine type
 	Machine string `json:"machine,omitempty"`
 	// amount of RAM for the VM in MiB : 16 ~
-	Memory          int         `json:"memory,omitempty"`
+	Memory          StringOrInt `json:"memory,omitempty"`
 	MigrateDowntime json.Number `json:"migrate_downtime,omitempty"`
 	MigrateSpeed    int         `json:"migrate_speed,omitempty"`
 	// name for VM. Only used on the configuration web interface
