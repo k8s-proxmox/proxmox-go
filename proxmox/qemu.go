@@ -25,7 +25,7 @@ const (
 
 // VirtualMachines returns all qemus across all proxmox nodes
 func (s *Service) VirtualMachines(ctx context.Context) ([]*api.VirtualMachine, error) {
-	nodes, err := s.Nodes(ctx)
+	nodes, err := s.GetNodes(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (s *Service) VirtualMachines(ctx context.Context) ([]*api.VirtualMachine, e
 }
 
 func (s *Service) VirtualMachine(ctx context.Context, vmid int) (*VirtualMachine, error) {
-	nodes, err := s.Nodes(ctx)
+	nodes, err := s.GetNodes(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (s *Service) CloneVirtualMachine(ctx context.Context, node string, vmid int
 // VirtualMachineFromUUID attempts to find virtual machine based on SMBIOS UUID. It will ignore any error that prevents
 // it from inspecting additional virtual machines (e.g. offline node, vm config not accessible, malformed uuids)
 func (s *Service) VirtualMachineFromUUID(ctx context.Context, uuid string) (*VirtualMachine, error) {
-	nodes, err := s.Nodes(ctx)
+	nodes, err := s.GetNodes(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func (s *Service) VirtualMachineFromUUID(ctx context.Context, uuid string) (*Vir
 
 // return true if there is any vm having specified name
 func (s *Service) VirtualMachineExistsWithName(ctx context.Context, name string) (bool, error) {
-	nodes, err := s.Nodes(ctx)
+	nodes, err := s.GetNodes(ctx)
 	if err != nil {
 		return false, err
 	}
