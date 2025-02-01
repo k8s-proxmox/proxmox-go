@@ -38,6 +38,18 @@ func (s *Storage) Delete(ctx context.Context) error {
 	return s.restclient.DeleteStorage(ctx, s.Storage.Storage)
 }
 
+func (s *Storage) GetStatus(ctx context.Context) ([]*api.Storage, error) {
+	var status []*api.Storage
+	if s.Node == "" {
+		return nil, errors.New("Node must not be empty")
+	}
+	path := fmt.Sprintf("/nodes/%s/storage/%s/status", s.Node, s.Storage.Storage)
+	if err := s.restclient.Get(ctx, path, &status); err != nil {
+		return nil, err
+	}
+	return status, nil
+}
+
 func (s *Storage) GetContents(ctx context.Context) ([]*api.StorageContent, error) {
 	var contents []*api.StorageContent
 	if s.Node == "" {
