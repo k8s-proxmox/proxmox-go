@@ -55,3 +55,25 @@ func (c *RESTClient) GetNodeVNCWebSocket(ctx context.Context, nodeName, port, vn
 	}
 	return websocket, nil
 }
+
+func (c *RESTClient) GetNodeStorages(ctx context.Context, nodeName string) ([]*api.Storage, error) {
+	path := fmt.Sprintf("/nodes/%s/storage", nodeName)
+	var storages []*api.Storage
+	if err := c.Get(ctx, path, &storages); err != nil {
+		return nil, err
+	}
+	return storages, nil
+}
+
+func (c *RESTClient) GetNodeStorage(ctx context.Context, nodeName, storageName string) (*api.Storage, error) {
+	storages, err := c.GetNodeStorages(ctx, nodeName)
+	if err != nil {
+		return nil, err
+	}
+	for _, s := range storages {
+		if s.Storage == storageName {
+			return s, nil
+		}
+	}
+	return nil, NotFoundErr
+}
